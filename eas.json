@@ -1,0 +1,57 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyB8xrhxHTCI4iPAim10IiLC_BUqbjKyC6g",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "petapp-54886.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "petapp-54886",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "petapp-54886.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "887229026004",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:887229026004:web:453488bd9fe49f92b6b541",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "887229026004-va5ctui1rdhrit99kif78h3fm2512iol.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "887229026004-m5gas224ctgrkn98j57du3cos4vq8mae.apps.googleusercontent.com"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyB8xrhxHTCI4iPAim10IiLC_BUqbjKyC6g",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "petapp-54886.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "petapp-54886",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "petapp-54886.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "887229026004",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:887229026004:web:453488bd9fe49f92b6b541",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "887229026004-va5ctui1rdhrit99kif78h3fm2512iol.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "887229026004-m5gas224ctgrkn98j57du3cos4vq8mae.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyB8xrhxHTCI4iPAim10IiLC_BUqbjKyC6g",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "petapp-54886.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "petapp-54886",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "petapp-54886.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "887229026004",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:887229026004:web:453488bd9fe49f92b6b541",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "887229026004-va5ctui1rdhrit99kif78h3fm2512iol.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "887229026004-m5gas224ctgrkn98j57du3cos4vq8mae.apps.googleusercontent.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

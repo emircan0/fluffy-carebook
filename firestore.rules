@@ -1,0 +1,531 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function nullableString(value) {
+      return value == null || value is string;
+    }
+
+    function requiredString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function validTimestamp(value) {
+      return value is timestamp;
+    }
+
+    function nullableTimestamp(value) {
+      return value == null || value is timestamp;
+    }
+
+    function validMemberRole(value) {
+      return value in ['owner', 'editor', 'viewer'];
+    }
+
+    function validMemberStatus(value) {
+      return value in ['active', 'removed'];
+    }
+
+    function hasActivePetMember(petId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/pets/$(petId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/pets/$(petId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isPetOwnerByDocument(petId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/pets/$(petId))
+        && get(/databases/$(database)/documents/pets/$(petId)).data.ownerId == request.auth.uid;
+    }
+
+    function isPetMember(petId) {
+      return hasActivePetMember(petId) || isPetOwnerByDocument(petId);
+    }
+
+    function isPetOwner(petId) {
+      return isPetOwnerByDocument(petId)
+        || (
+          hasActivePetMember(petId)
+          && get(/databases/$(database)/documents/pets/$(petId)/members/$(request.auth.uid)).data.role == 'owner'
+        );
+    }
+
+    function canEditPet(petId) {
+      return isPetOwnerByDocument(petId)
+        || (
+          hasActivePetMember(petId)
+          && get(/databases/$(database)/documents/pets/$(petId)/members/$(request.auth.uid)).data.role in ['owner', 'editor']
+        );
+    }
+
+    function validSpecies(value) {
+      return value in ['cat', 'dog', 'bird', 'rabbit', 'other'];
+    }
+
+    function validGender(value) {
+      return value in ['male', 'female', 'unknown'];
+    }
+
+    function validInviteRole(value) {
+      return value in ['editor', 'viewer'];
+    }
+
+    function validCareEventType(value) {
+      return value in ['food', 'medicine', 'litter', 'water', 'walk', 'bath', 'grooming', 'other'];
+    }
+
+    function validCareScheduleType(value) {
+      return value in ['none', 'daily', 'weekly', 'monthly'];
+    }
+
+    function validReminderType(value) {
+      return value in ['vaccine', 'internal_parasite', 'external_parasite', 'medicine', 'vet', 'other'];
+    }
+
+    function validExpenseCategory(value) {
+      return value in ['food', 'vet', 'medicine', 'accessory', 'other'];
+    }
+
+    function validReminderRecurrence(value) {
+      return value in ['none', 'daily', 'weekly', 'monthly', 'yearly'];
+    }
+
+    function validAccountStatus(value) {
+      return value in ['active', 'inactive'];
+    }
+
+    function validNotificationPreferences(value) {
+      return value is map
+        && value.keys().hasOnly(['vaccine', 'internal_parasite', 'external_parasite', 'medicine', 'vet', 'other'])
+        && value.keys().hasAll(['vaccine', 'internal_parasite', 'external_parasite', 'medicine', 'vet', 'other'])
+        && value.vaccine is bool
+        && value.internal_parasite is bool
+        && value.external_parasite is bool
+        && value.medicine is bool
+        && value.vet is bool
+        && value.other is bool;
+    }
+
+    function validUserProfile(userId) {
+      return request.resource.data.keys().hasOnly(['id', 'email', 'fullName', 'avatarUrl', 'accountStatus', 'deactivatedAt', 'isAnonymous', 'onboardingCompleted', 'onboardingCompletedAt', 'notificationPreferences', 'notificationPreferencesUpdatedAt', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['id', 'email', 'fullName', 'avatarUrl', 'createdAt', 'updatedAt'])
+        && request.resource.data.id == userId
+        && nullableString(request.resource.data.email)
+        && nullableString(request.resource.data.fullName)
+        && nullableString(request.resource.data.avatarUrl)
+        && (!('accountStatus' in request.resource.data) || validAccountStatus(request.resource.data.accountStatus))
+        && (!('deactivatedAt' in request.resource.data) || nullableTimestamp(request.resource.data.deactivatedAt))
+        && (!('isAnonymous' in request.resource.data) || request.resource.data.isAnonymous is bool)
+        && (!('onboardingCompleted' in request.resource.data) || request.resource.data.onboardingCompleted is bool)
+        && (!('onboardingCompletedAt' in request.resource.data) || nullableTimestamp(request.resource.data.onboardingCompletedAt))
+        && (!('notificationPreferences' in request.resource.data) || validNotificationPreferences(request.resource.data.notificationPreferences))
+        && (!('notificationPreferencesUpdatedAt' in request.resource.data) || nullableTimestamp(request.resource.data.notificationPreferencesUpdatedAt))
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt);
+    }
+
+    function validPetCreate(petId) {
+      return request.resource.data.keys().hasOnly(['id', 'name', 'species', 'breed', 'birthDate', 'gender', 'photoUrl', 'microchipNo', 'notes', 'ownerId', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.keys().hasAll(['id', 'name', 'species', 'breed', 'birthDate', 'gender', 'photoUrl', 'microchipNo', 'notes', 'ownerId', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == petId
+        && request.resource.data.ownerId == request.auth.uid
+        && requiredString(request.resource.data.name)
+        && validSpecies(request.resource.data.species)
+        && validGender(request.resource.data.gender)
+        && nullableString(request.resource.data.breed)
+        && nullableString(request.resource.data.birthDate)
+        && nullableString(request.resource.data.photoUrl)
+        && nullableString(request.resource.data.microchipNo)
+        && nullableString(request.resource.data.notes)
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt)
+        && request.resource.data.deletedAt == null;
+    }
+
+    function validPetUpdate() {
+      return request.resource.data.keys().hasOnly(['id', 'name', 'species', 'breed', 'birthDate', 'gender', 'photoUrl', 'microchipNo', 'notes', 'ownerId', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && requiredString(request.resource.data.name)
+        && validSpecies(request.resource.data.species)
+        && validGender(request.resource.data.gender)
+        && nullableString(request.resource.data.breed)
+        && nullableString(request.resource.data.birthDate)
+        && nullableString(request.resource.data.photoUrl)
+        && nullableString(request.resource.data.microchipNo)
+        && nullableString(request.resource.data.notes)
+        && validTimestamp(request.resource.data.updatedAt)
+        && nullableTimestamp(request.resource.data.deletedAt);
+    }
+
+    function validMemberCreate(userId) {
+      return request.resource.data.keys().hasOnly(['userId', 'role', 'status', 'invitedBy', 'inviteToken', 'email', 'fullName', 'avatarUrl', 'joinedAt', 'updatedAt'])
+        && request.resource.data.userId == userId
+        && validMemberRole(request.resource.data.role)
+        && validMemberStatus(request.resource.data.status)
+        && nullableString(request.resource.data.invitedBy)
+        && nullableString(request.resource.data.email)
+        && nullableString(request.resource.data.fullName)
+        && nullableString(request.resource.data.avatarUrl)
+        && validTimestamp(request.resource.data.joinedAt)
+        && validTimestamp(request.resource.data.updatedAt);
+    }
+
+    function isValidAcceptInviteMemberCreate(petId, userId) {
+      return signedIn()
+        && userId == request.auth.uid
+        && validMemberCreate(userId)
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.role in ['editor', 'viewer']
+        && request.resource.data.status == 'active'
+        && request.resource.data.inviteToken is string
+        && exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken))
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.petId == petId
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.role == request.resource.data.role
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.expiresAt > request.time
+        && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.status == 'pending'
+        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.status == 'accepted'
+        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteToken)).data.acceptedBy == request.auth.uid;
+    }
+
+    function validCareTaskCreate(taskId, petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'createdBy', 'title', 'eventType', 'scheduleType', 'dueTime', 'isActive', 'allowMultiplePerDay', 'notifyEnabled', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.keys().hasAll(['id', 'petId', 'createdBy', 'title', 'eventType', 'scheduleType', 'dueTime', 'isActive', 'allowMultiplePerDay', 'notifyEnabled', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == taskId
+        && request.resource.data.petId == petId
+        && request.resource.data.createdBy == request.auth.uid
+        && requiredString(request.resource.data.title)
+        && validCareEventType(request.resource.data.eventType)
+        && validCareScheduleType(request.resource.data.scheduleType)
+        && nullableString(request.resource.data.dueTime)
+        && request.resource.data.isActive == true
+        && request.resource.data.allowMultiplePerDay is bool
+        && request.resource.data.notifyEnabled is bool
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt)
+        && request.resource.data.deletedAt == null;
+    }
+
+    function validCareTaskUpdate(petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'createdBy', 'title', 'eventType', 'scheduleType', 'dueTime', 'isActive', 'allowMultiplePerDay', 'notifyEnabled', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.petId == petId
+        && request.resource.data.petId == resource.data.petId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && requiredString(request.resource.data.title)
+        && validCareEventType(request.resource.data.eventType)
+        && validCareScheduleType(request.resource.data.scheduleType)
+        && nullableString(request.resource.data.dueTime)
+        && request.resource.data.isActive is bool
+        && request.resource.data.allowMultiplePerDay is bool
+        && request.resource.data.notifyEnabled is bool
+        && validTimestamp(request.resource.data.updatedAt)
+        && nullableTimestamp(request.resource.data.deletedAt);
+    }
+
+    function validCareEventCreate(eventId, petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'taskId', 'taskTitle', 'userId', 'userName', 'eventType', 'status', 'doneAt', 'occurrenceKey', 'clientEventId', 'note', 'createdAt'])
+        && request.resource.data.keys().hasAll(['id', 'petId', 'taskId', 'taskTitle', 'userId', 'userName', 'eventType', 'status', 'doneAt', 'occurrenceKey', 'clientEventId', 'note', 'createdAt'])
+        && request.resource.data.id == eventId
+        && request.resource.data.petId == petId
+        && request.resource.data.userId == request.auth.uid
+        && requiredString(request.resource.data.taskId)
+        && requiredString(request.resource.data.taskTitle)
+        && nullableString(request.resource.data.userName)
+        && requiredString(request.resource.data.clientEventId)
+        && request.resource.data.status in ['done', 'skipped']
+        && validCareEventType(request.resource.data.eventType)
+        && validTimestamp(request.resource.data.doneAt)
+        && nullableString(request.resource.data.occurrenceKey)
+        && nullableString(request.resource.data.note)
+        && validTimestamp(request.resource.data.createdAt);
+    }
+
+    function validExpenseCreate(expenseId, petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'amount', 'category', 'date', 'title', 'notes', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.keys().hasAll(['id', 'petId', 'amount', 'category', 'date', 'title', 'notes', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == expenseId
+        && request.resource.data.petId == petId
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && validExpenseCategory(request.resource.data.category)
+        && requiredString(request.resource.data.title)
+        && nullableString(request.resource.data.notes)
+        && validTimestamp(request.resource.data.date)
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt)
+        && request.resource.data.deletedAt == null;
+    }
+
+    function validExpenseUpdate(petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'amount', 'category', 'date', 'title', 'notes', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.petId == petId
+        && request.resource.data.petId == resource.data.petId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && validExpenseCategory(request.resource.data.category)
+        && requiredString(request.resource.data.title)
+        && nullableString(request.resource.data.notes)
+        && validTimestamp(request.resource.data.date)
+        && validTimestamp(request.resource.data.updatedAt)
+        && nullableTimestamp(request.resource.data.deletedAt);
+    }
+
+    function validReminderCreate(reminderId, petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'createdBy', 'title', 'reminderType', 'remindAt', 'recurrence', 'notifyEnabled', 'isActive', 'isCompleted', 'completedAt', 'completedBy', 'completedByName', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.keys().hasAll(['id', 'petId', 'createdBy', 'title', 'reminderType', 'remindAt', 'recurrence', 'notifyEnabled', 'isActive', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == reminderId
+        && request.resource.data.petId == petId
+        && request.resource.data.createdBy == request.auth.uid
+        && requiredString(request.resource.data.title)
+        && validReminderType(request.resource.data.reminderType)
+        && validReminderRecurrence(request.resource.data.recurrence)
+        && validTimestamp(request.resource.data.remindAt)
+        && request.resource.data.notifyEnabled is bool
+        && request.resource.data.isActive == true
+        && (!('isCompleted' in request.resource.data) || request.resource.data.isCompleted is bool)
+        && (!('completedAt' in request.resource.data) || nullableTimestamp(request.resource.data.completedAt))
+        && (!('completedBy' in request.resource.data) || nullableString(request.resource.data.completedBy))
+        && (!('completedByName' in request.resource.data) || nullableString(request.resource.data.completedByName))
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt)
+        && request.resource.data.deletedAt == null;
+    }
+
+    function validReminderUpdate(petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'createdBy', 'title', 'reminderType', 'remindAt', 'recurrence', 'notifyEnabled', 'isActive', 'isCompleted', 'completedAt', 'completedBy', 'completedByName', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.petId == petId
+        && request.resource.data.petId == resource.data.petId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && requiredString(request.resource.data.title)
+        && validReminderType(request.resource.data.reminderType)
+        && validReminderRecurrence(request.resource.data.recurrence)
+        && validTimestamp(request.resource.data.remindAt)
+        && request.resource.data.notifyEnabled is bool
+        && request.resource.data.isActive is bool
+        && (!('isCompleted' in request.resource.data) || request.resource.data.isCompleted is bool)
+        && (!('completedAt' in request.resource.data) || nullableTimestamp(request.resource.data.completedAt))
+        && (!('completedBy' in request.resource.data) || nullableString(request.resource.data.completedBy))
+        && (!('completedByName' in request.resource.data) || nullableString(request.resource.data.completedByName))
+        && validTimestamp(request.resource.data.updatedAt)
+        && nullableTimestamp(request.resource.data.deletedAt);
+    }
+
+    function validMeasurementCreate(measurementId, petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'weight', 'height', 'date', 'notes', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.keys().hasAll(['id', 'petId', 'weight', 'date', 'createdBy', 'createdAt', 'updatedAt'])
+        && request.resource.data.id == measurementId
+        && request.resource.data.petId == petId
+        && request.resource.data.createdBy == request.auth.uid
+        && (request.resource.data.weight is int || request.resource.data.weight is float)
+        && request.resource.data.weight > 0
+        && (!('height' in request.resource.data) || request.resource.data.height == null || request.resource.data.height is int || request.resource.data.height is float)
+        && (!('height' in request.resource.data) || request.resource.data.height == null || request.resource.data.height > 0)
+        && (!('notes' in request.resource.data) || nullableString(request.resource.data.notes))
+        && validTimestamp(request.resource.data.date)
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt)
+        && (!('deletedAt' in request.resource.data) || request.resource.data.deletedAt == null);
+    }
+
+    function validMeasurementUpdate(petId) {
+      return request.resource.data.keys().hasOnly(['id', 'petId', 'weight', 'height', 'date', 'notes', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.petId == petId
+        && request.resource.data.petId == resource.data.petId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (request.resource.data.weight is int || request.resource.data.weight is float)
+        && request.resource.data.weight > 0
+        && (!('height' in request.resource.data) || request.resource.data.height == null || request.resource.data.height is int || request.resource.data.height is float)
+        && (!('height' in request.resource.data) || request.resource.data.height == null || request.resource.data.height > 0)
+        && (!('notes' in request.resource.data) || nullableString(request.resource.data.notes))
+        && validTimestamp(request.resource.data.date)
+        && validTimestamp(request.resource.data.updatedAt)
+        && (!('deletedAt' in request.resource.data) || nullableTimestamp(request.resource.data.deletedAt));
+    }
+
+    function validInviteCreate(inviteToken) {
+      return request.resource.data.keys().hasOnly(['id', 'token', 'petId', 'petName', 'invitedBy', 'invitedByName', 'role', 'status', 'acceptedBy', 'createdAt', 'expiresAt', 'acceptedAt'])
+        && request.resource.data.keys().hasAll(['id', 'token', 'petId', 'petName', 'invitedBy', 'invitedByName', 'role', 'status', 'acceptedBy', 'createdAt', 'expiresAt', 'acceptedAt'])
+        && request.resource.data.id == inviteToken
+        && request.resource.data.token == inviteToken
+        && requiredString(request.resource.data.petId)
+        && requiredString(request.resource.data.petName)
+        && request.resource.data.invitedBy == request.auth.uid
+        && nullableString(request.resource.data.invitedByName)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.acceptedBy == null
+        && request.resource.data.acceptedAt == null
+        && validInviteRole(request.resource.data.role)
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.expiresAt)
+        && request.resource.data.expiresAt > request.time
+        && isPetOwner(request.resource.data.petId);
+    }
+
+    function validInviteAcceptUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedBy', 'acceptedAt', 'updatedAt'])
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.acceptedBy == request.auth.uid
+        && validTimestamp(request.resource.data.acceptedAt)
+        && (!('updatedAt' in request.resource.data) || validTimestamp(request.resource.data.updatedAt))
+        && request.resource.data.petId == resource.data.petId
+        && request.resource.data.petName == resource.data.petName
+        && request.resource.data.invitedBy == resource.data.invitedBy
+        && request.resource.data.invitedByName == resource.data.invitedByName
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.token == resource.data.token
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.expiresAt == resource.data.expiresAt
+        && resource.data.expiresAt > request.time;
+    }
+
+    function validNotificationTokenCreate(userId, tokenId) {
+      return request.resource.data.keys().hasOnly(['id', 'userId', 'expoPushToken', 'platform', 'deviceId', 'isActive', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['id', 'userId', 'expoPushToken', 'platform', 'deviceId', 'isActive', 'createdAt', 'updatedAt'])
+        && request.resource.data.id == tokenId
+        && request.resource.data.userId == userId
+        && request.resource.data.userId == request.auth.uid
+        && requiredString(request.resource.data.expoPushToken)
+        && request.resource.data.platform in ['ios', 'android', 'web']
+        && nullableString(request.resource.data.deviceId)
+        && request.resource.data.isActive is bool
+        && validTimestamp(request.resource.data.createdAt)
+        && validTimestamp(request.resource.data.updatedAt);
+    }
+
+    function validNotificationTokenUpdate(userId) {
+      return request.resource.data.keys().hasOnly(['id', 'userId', 'expoPushToken', 'platform', 'deviceId', 'isActive', 'createdAt', 'updatedAt'])
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.userId == userId
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && requiredString(request.resource.data.expoPushToken)
+        && request.resource.data.platform in ['ios', 'android', 'web']
+        && nullableString(request.resource.data.deviceId)
+        && request.resource.data.isActive is bool
+        && validTimestamp(request.resource.data.updatedAt);
+    }
+
+    match /users/{userId} {
+      allow read: if isSelf(userId);
+      allow create: if isSelf(userId) && validUserProfile(userId);
+      allow update: if isSelf(userId)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && validUserProfile(userId)
+        && (
+          !('accountStatus' in resource.data)
+          || resource.data.accountStatus != 'inactive'
+          || request.resource.data.accountStatus == 'inactive'
+        );
+      allow delete: if false;
+    }
+
+    match /pets/{petId} {
+      allow read: if isPetMember(petId);
+      allow create: if signedIn() && validPetCreate(petId);
+      allow update: if isPetOwner(petId) && validPetUpdate();
+      allow delete: if isPetOwner(petId);
+
+      match /members/{userId} {
+        allow read: if isPetMember(petId);
+
+        allow create: if (signedIn()
+          && userId == request.auth.uid
+          && validMemberCreate(userId)
+          && request.resource.data.role == 'owner'
+          && request.resource.data.status == 'active'
+          && request.resource.data.invitedBy == null
+          && !('inviteToken' in request.resource.data)
+          && getAfter(/databases/$(database)/documents/pets/$(petId)).data.ownerId == request.auth.uid)
+          || isValidAcceptInviteMemberCreate(petId, userId);
+
+        allow update, delete: if isPetOwner(petId);
+      }
+
+      match /careTasks/{taskId} {
+        allow read: if isPetMember(petId);
+        allow create: if canEditPet(petId) && validCareTaskCreate(taskId, petId);
+        allow update: if canEditPet(petId) && validCareTaskUpdate(petId);
+        allow delete: if isPetOwner(petId);
+      }
+
+      match /careEvents/{eventId} {
+        allow read: if isPetMember(petId);
+        allow create: if canEditPet(petId) && validCareEventCreate(eventId, petId);
+        allow update, delete: if false;
+      }
+
+      match /reminders/{reminderId} {
+        allow read: if isPetMember(petId);
+        allow create: if canEditPet(petId) && validReminderCreate(reminderId, petId);
+        allow update: if canEditPet(petId) && validReminderUpdate(petId);
+        allow delete: if false;
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isPetMember(petId);
+        allow create: if canEditPet(petId) && validExpenseCreate(expenseId, petId);
+        allow update: if canEditPet(petId) && validExpenseUpdate(petId);
+        allow delete: if false;
+      }
+
+      match /measurements/{measurementId} {
+        allow read: if isPetMember(petId);
+        allow create: if canEditPet(petId) && validMeasurementCreate(measurementId, petId);
+        allow update: if canEditPet(petId) && validMeasurementUpdate(petId);
+        allow delete: if false;
+      }
+    }
+
+    match /invites/{inviteToken} {
+      allow read: if signedIn()
+        && (
+          resource.data.status == 'pending'
+          || resource.data.acceptedBy == request.auth.uid
+          || isPetOwner(resource.data.petId)
+        );
+
+      allow create: if signedIn() && validInviteCreate(inviteToken);
+      allow update: if signedIn() && validInviteAcceptUpdate();
+      allow delete: if false;
+    }
+
+    match /notificationTokens/{userId}/tokens/{tokenId} {
+      allow read: if isSelf(userId);
+      allow create: if isSelf(userId) && validNotificationTokenCreate(userId, tokenId);
+      allow update: if isSelf(userId) && validNotificationTokenUpdate(userId);
+      allow delete: if isSelf(userId);
+    }
+
+    match /{path=**}/members/{memberUserId} {
+      allow read: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'active';
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

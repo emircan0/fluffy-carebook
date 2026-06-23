@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "YuvioPet",
+    "slug": "yuviopet",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "yuviopet",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FDFBF7"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yuviopet.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "buildNumber": "7",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "package": "com.yuviopet.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#FDFBF7",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "311037db-bb52-457a-ac1f-9729ed43d11e"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.887229026004-m5gas224ctgrkn98j57du3cos4vq8mae"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
