@@ -13,6 +13,7 @@ import {
 
 import { firebaseConfigError, type UserProfile } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
+import i18n from './i18n';
 import type {
   CareEvent,
   CareEventStatus,
@@ -21,23 +22,26 @@ import type {
   CareTask,
 } from '../types/app';
 
-export const careEventLabels: Record<CareEventType, string> = {
-  food: 'Mama',
-  medicine: 'Ilac',
-  litter: 'Kum',
-  water: 'Su',
-  walk: 'Yuruyus',
-  bath: 'Banyo',
-  grooming: 'Tuy/Tarama',
-  other: 'Diger',
-};
+export const careEventLabels = {
+  get food() { return i18n.t('careEvent.food'); },
+  get medicine() { return i18n.t('careEvent.medicine'); },
+  get litter() { return i18n.t('careEvent.litter'); },
+  get water() { return i18n.t('careEvent.water'); },
+  get walk() { return i18n.t('careEvent.walk'); },
+  get bath() { return i18n.t('careEvent.bath'); },
+  get grooming() { return i18n.t('careEvent.grooming'); },
+  get play() { return i18n.t('careEvent.play'); },
+  get training() { return i18n.t('careEvent.training'); },
+  get teeth() { return i18n.t('careEvent.teeth'); },
+  get other() { return i18n.t('careEvent.other'); },
+} as Record<CareEventType, string>;
 
-export const careScheduleLabels: Record<CareScheduleType, string> = {
-  none: 'Tek sefer',
-  daily: 'Gunluk',
-  weekly: 'Haftalik',
-  monthly: 'Aylik',
-};
+export const careScheduleLabels = {
+  get none() { return i18n.t('careSchedule.none'); },
+  get daily() { return i18n.t('careSchedule.daily'); },
+  get weekly() { return i18n.t('careSchedule.weekly'); },
+  get monthly() { return i18n.t('careSchedule.monthly'); },
+} as Record<CareScheduleType, string>;
 
 export type CreateCareTaskInput = {
   petId: string;
@@ -50,10 +54,10 @@ export type CreateCareTaskInput = {
 };
 
 export const careMessages = {
-  missingAuth: 'Bakim islemleri icin giris yapmalisiniz.',
-  missingTitle: 'Gorev basligi zorunlu.',
-  editOnly: 'Bu işlem için yetkin yok.',
-  alreadyDone: 'Bu görev bugün zaten işaretlenmiş.',
+  get missingAuth() { return i18n.t('care.missingAuth'); },
+  get missingTitle() { return i18n.t('care.missingTitle'); },
+  get editOnly() { return i18n.t('care.editOnly'); },
+  get alreadyDone() { return i18n.t('care.alreadyDone'); },
 };
 
 function requireFirestore() {
@@ -150,7 +154,7 @@ export function getCareErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Bakim islemi tamamlanamadi. Lutfen tekrar deneyin.';
+  return i18n.t('care.genericError');
 }
 
 export async function listCareTasks(petId: string) {

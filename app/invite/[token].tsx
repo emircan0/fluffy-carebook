@@ -1,5 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -17,6 +18,7 @@ const roleLabels = {
 };
 
 export default function InviteScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ token?: string }>();
   const token = params.token;
@@ -40,7 +42,7 @@ export default function InviteScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.screen}>
-      <Stack.Screen options={{ title: 'Davet' }} />
+      <Stack.Screen options={{ title: t('invite.title') }} />
       <View style={styles.container}>
         <Card style={styles.card}>
           <View style={styles.heroIcon}>
@@ -48,37 +50,37 @@ export default function InviteScreen() {
           </View>
           <View style={styles.header}>
             <Text style={styles.eyebrow}>YuvioPet</Text>
-            <Text style={styles.title}>Bakıcı daveti</Text>
-            <Text style={styles.subtitle}>Bir evcil dostun bakım ekibine katılmak üzeresin.</Text>
+            <Text style={styles.title}>{t('invite.careInvite')}</Text>
+            <Text style={styles.subtitle}>{t('invite.subtitle')}</Text>
           </View>
 
-          {inviteQuery.isLoading ? <LoadingState label="Davet bilgileri yükleniyor" /> : null}
+          {inviteQuery.isLoading ? <LoadingState label={t('invite.loading')} /> : null}
 
           {inviteQuery.error ? (
             <EmptyState
               icon="⚠️"
-              text={getInviteErrorMessage(inviteQuery.error)}
-              title="Davet açılamadı."
+              text={getInviteErrorMessage(inviteQuery.error) || t('invite.error')}
+              title={t('invite.errorTitle')}
             />
           ) : null}
 
           {invite ? (
             <View style={styles.details}>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Pet</Text>
+                <Text style={styles.detailLabel}>{t('invite.pet')}</Text>
                 <Text style={styles.detailValue}>{invite.petName}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Davet eden</Text>
+                <Text style={styles.detailLabel}>{t('invite.invitedBy')}</Text>
                 <Text style={styles.detailValue}>{invite.invitedByName || invite.invitedBy}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Rol</Text>
-                <Badge label={roleLabels[invite.role]} variant={invite.role === 'editor' ? 'roleEditor' : 'roleViewer'} />
+                <Text style={styles.detailLabel}>{t('invite.role')}</Text>
+                <Badge label={t(`roles.${invite.role}`)} variant={invite.role === 'editor' ? 'roleEditor' : 'roleViewer'} />
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Durum</Text>
-                <Badge label={invite.status} variant={isPending ? 'success' : 'muted'} />
+                <Text style={styles.detailLabel}>{t('invite.status')}</Text>
+                <Badge label={t(`inviteStatus.${invite.status}`) || invite.status} variant={isPending ? 'success' : 'muted'} />
               </View>
             </View>
           ) : null}
@@ -89,11 +91,11 @@ export default function InviteScreen() {
 
           <Button
             disabled={!isPending || acceptInviteMutation.isPending}
-            label="Daveti kabul et"
+            label={t('invite.accept')}
             loading={acceptInviteMutation.isPending}
             onPress={handleAccept}
           />
-          <Button label="Ana ekrana dön" onPress={() => router.replace('/')} variant="ghost" />
+          <Button label={t('invite.backHome')} onPress={() => router.replace('/')} variant="ghost" />
         </Card>
       </View>
     </ScrollView>

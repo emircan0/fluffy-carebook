@@ -7,8 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, layout, radius, spacing, typography, fontWeight, shadows, speciesConfig } from '../../lib/theme';
 import { usePets } from '../../lib/queries/usePets';
-import { useExpenses } from '../../lib/queries/useExpenses';
-import { expenseCategoryColors, expenseCategoryIcons, expenseCategoryLabels } from '../../lib/expenses';
+import { useQuery } from '@tanstack/react-query';
+import { fetchExpenses, expenseCategoryColors, expenseCategoryIcons, expenseCategoryLabels } from '../../lib/expenses';
+import { hasFirebaseConfig } from '../../lib/firebase';
 import { LoadingState } from '../../components/ui/LoadingState';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Card } from '../../components/ui/Card';
@@ -19,7 +20,7 @@ import type { ExpenseCategory } from '../../types/app';
 const { width } = Dimensions.get('window');
 
 export default function ExpensesScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
@@ -27,10 +28,35 @@ export default function ExpensesScreen() {
   
   const petsQuery = usePets();
   const pets = petsQuery.data ?? [];
-  const selectedPet = pets.find((p) => p.id === selectedPetId) || pets[0];
+  const selectedPet = selectedPetId ? pets.find((p) => p.id === selectedPetId) || null : null;
   const activePetId = selectedPet?.id ?? null;
 
-  const expensesQuery = useExpenses(activePetId);
+  const expensesQuery = useQuery({
+    queryKey: ['expenses_all_or_single', selectedPetId, pets.map((p) => p.id).join(',')],
+    queryFn: async () => {
+      if (selectedPetId) {
+        return fetchExpenses(selectedPetId);
+      }
+      if (pets.length === 0) return [];
+      const allExpenses = await Promise.all(
+        pets.map((p) => fetchExpenses(p.id))
+      );
+      
+      const getExpenseTime = (dateVal: any): number => {
+        if (dateVal && typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
+          return dateVal.toDate().getTime();
+        }
+        if (dateVal && typeof dateVal === 'object' && typeof dateVal.seconds === 'number') {
+          return dateVal.seconds * 1000;
+        }
+        return new Date(dateVal).getTime();
+      };
+      
+      return allExpenses.flat().sort((a, b) => getExpenseTime(b.date) - getExpenseTime(a.date));
+    },
+    enabled: pets.length > 0 && hasFirebaseConfig,
+  });
+
   const expenses = expensesQuery.data ?? [];
   
   const petQuery = usePet(activePetId ?? undefined);
@@ -81,9 +107,11 @@ export default function ExpensesScreen() {
       >
         <View style={styles.header}>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Masraflar</Text>
+            <Text style={styles.title}>{t("expenses.title")}</Text>
             <Text style={styles.subtitle}>
-              {selectedPet ? `${selectedPet.name} ${t('expenses.forPet')}` : t('expenses.selectPet')}
+              {selectedPetId === null
+                ? t('expenses.allPetsDesc')
+                : `${selectedPet?.name} ${t('expenses.forPet')}`}
             </Text>
           </View>
         </View>
@@ -93,10 +121,29 @@ export default function ExpensesScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.petScrollerContainer}
             contentContainerStyle={styles.petScroller}
           >
+            <Pressable
+              onPress={() => setSelectedPetId(null)}
+              style={({ pressed }) => [
+                styles.petChip,
+                selectedPetId === null && styles.petChipSelected,
+                pressed && styles.pressed,
+              ]}
+            >
+              <View style={styles.petChipContent}>
+                <View style={[styles.petChipAvatar, { backgroundColor: colors.accent + '18' }]}>
+                  <Text style={styles.petChipEmoji}>🐾</Text>
+                </View>
+                <Text style={[styles.petChipName, selectedPetId === null && styles.petChipNameSelected]}>
+                  {t('expenses.allPets')}
+                </Text>
+              </View>
+            </Pressable>
+
             {pets.map((pet) => {
-              const isSelected = pet.id === activePetId;
+              const isSelected = pet.id === selectedPetId;
               const cfg = speciesConfig[pet.species];
 
               return (
@@ -109,45 +156,50 @@ export default function ExpensesScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '18' }]}>
-                    <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
+                  <View style={styles.petChipContent}>
+                    <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '18' }]}>
+                      <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
+                    </View>
+                    <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
+                      {pet.name}
+                    </Text>
                   </View>
-                  <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
-                    {pet.name}
-                  </Text>
                 </Pressable>
               );
             })}
           </ScrollView>
         ) : null}
 
-        {petsQuery.isLoading && <LoadingState label={t("expenses.loading")} />}
-        {petsQuery.error && (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
+        {petsQuery.isLoading || petsQuery.error || (!petsQuery.isLoading && !petsQuery.error && pets.length === 0) ? (
+          <View>
+            {petsQuery.isLoading && <LoadingState label={t("expenses.loading")} />}
+            {petsQuery.error && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
+              </View>
+            )}
+            {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 && (
+              <Card>
+                <EmptyState
+                  icon="🐾"
+                  title={t("expenses.noPetTitle")}
+                  text={t("expenses.noPetDesc")}
+                />
+              </Card>
+            )}
           </View>
-        )}
-
-        {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 ? (
-          <Card>
-            <EmptyState
-              icon="🐾"
-              title={t("expenses.noPetTitle")}
-              text={t("expenses.noPetDesc")}
-            />
-          </Card>
         ) : null}
 
-        {selectedPet ? (
+        {pets.length > 0 ? (
           <>
             {/* Monthly Total Card */}
             <View style={styles.totalCard}>
               <View style={styles.totalCardTop}>
                 <Feather name="pie-chart" size={24} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.totalLabel}>Bu Ayki Toplam</Text>
+                <Text style={styles.totalLabel}>{t("expenses.thisMonthTotal")}</Text>
               </View>
               <Text style={styles.totalAmount}>₺{monthlyTotal.toLocaleString('tr-TR')}</Text>
-              <Text style={styles.totalSubtext}>{new Date().toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}</Text>
+              <Text style={styles.totalSubtext}>{new Date().toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}</Text>
             </View>
 
             {/* Category Breakdown */}
@@ -196,7 +248,7 @@ export default function ExpensesScreen() {
               ) : expensesQuery.error ? (
                 <View style={styles.errorBox}>
                   <Text style={styles.errorText}>
-                    Masraflar yüklenirken bir hata oluştu: {expensesQuery.error.message}
+                    {t("expenses.loadError", { error: expensesQuery.error.message })}
                   </Text>
                 </View>
               ) : expenses.length === 0 ? (
@@ -230,7 +282,7 @@ export default function ExpensesScreen() {
                         <View style={styles.expenseContent}>
                           <Text style={styles.expenseTitle}>{expense.title}</Text>
                           <Text style={styles.expenseDate}>
-                            {d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                            {d.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
                             {expense.notes ? ` · ${expense.notes}` : ''}
                           </Text>
                         </View>
@@ -295,17 +347,18 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
+  petScrollerContainer: {
+    height: 92,
+  },
   petChip: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'center',
     backgroundColor: colors.surface,
-    borderRadius: radius.pill,
+    borderRadius: 42,
     borderWidth: 1,
     borderColor: colors.surfaceBorder,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minWidth: 100,
+    width: 84,
+    height: 84,
     ...shadows.sm,
   },
   petChipSelected: {
@@ -313,20 +366,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSofter,
     ...shadows.accent,
   },
+  petChipContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
   petChipAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   petChipEmoji: {
-    fontSize: 12,
+    fontSize: 16,
   },
   petChipName: {
-    fontSize: typography.caption,
+    fontSize: 11,
     fontWeight: fontWeight.semibold,
     color: colors.textSecondary,
+    textAlign: 'center',
   },
   petChipNameSelected: {
     color: colors.accentDark,

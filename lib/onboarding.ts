@@ -3,9 +3,11 @@ import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { firebaseConfigError } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
 
+import i18n from './i18n';
+
 export const onboardingMessages = {
-  missingAuth: 'Kurulumu tamamlamak için giriş yapmalısınız.',
-  completed: 'Kurulum tamamlandı.',
+  get missingAuth() { return i18n.t('onboarding.missingAuth'); },
+  get completed() { return i18n.t('onboarding.completed'); },
 };
 
 function requireFirestore() {
@@ -36,5 +38,5 @@ export function getOnboardingErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Kurulum tamamlanamadı. Lütfen tekrar deneyin.';
+  return i18n.t('onboarding.genericError');
 }

@@ -13,6 +13,7 @@ import { LoadingState } from '../../components/ui/LoadingState';
 import { getPetErrorMessage } from '../../lib/pets';
 import { useCreatePet } from '../../lib/mutations/useCreatePet';
 import { usePets } from '../../lib/queries/usePets';
+import { useAcceptInvite } from '../../lib/mutations/useAcceptInvite';
 import {
   colors,
   fontWeight,
@@ -49,8 +50,11 @@ export default function PetsScreen() {
   const setSelectedPetId = useAppStore((s) => s.setSelectedPetId);
   const petsQuery = usePets();
   const createPetMutation = useCreatePet();
+  const acceptInviteMutation = useAcceptInvite();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
+  const [inviteCode, setInviteCode] = useState('');
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<PetSpecies>('cat');
   const [gender, setGender] = useState<PetGender>('unknown');
@@ -87,6 +91,24 @@ export default function PetsScreen() {
     }
   }
 
+  const normalizedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
+
+  async function handleJoinPet() {
+    if (normalizedInviteCode.length !== 6) {
+      setFormError('Davet kodu 6 haneli olmalıdır.');
+      return;
+    }
+    setFormError(null);
+    try {
+      const invite = await acceptInviteMutation.mutateAsync(normalizedInviteCode);
+      setSelectedPetId(invite.petId);
+      setIsFormOpen(false);
+      setInviteCode('');
+    } catch (error: any) {
+      setFormError(error.message || 'Davet kodu geçersiz veya süresi dolmuş.');
+    }
+  }
+
   const onDateChange = (event: any, date?: Date) => {
     if (Platform.OS !== 'ios') {
       setShowDatePicker(false);
@@ -115,7 +137,7 @@ export default function PetsScreen() {
             </Text>
             <Text style={styles.subtitle}>
               {isFormOpen
-                ? 'Dostunuzun temel bilgilerini girin.'
+                ? t('pets.enterBasicInfo')
                 : t('pets.careTeamPets')}
             </Text>
           </View>
@@ -140,10 +162,21 @@ export default function PetsScreen() {
           </Pressable>
         </View>
 
-        {/* ── Create Form ── */}
+        {/* ── Create / Join Form ── */}
         {isFormOpen ? (
           <Card style={styles.formCard}>
-            <View style={styles.formFields}>
+            <View style={{ flexDirection: 'row', marginBottom: 16, gap: 16 }}>
+              <Pressable onPress={() => setActiveTab('create')} style={{ paddingBottom: 8, borderBottomWidth: 2, borderBottomColor: activeTab === 'create' ? colors.accent : 'transparent' }}>
+                <Text style={{ fontWeight: activeTab === 'create' ? 'bold' : 'normal', color: activeTab === 'create' ? colors.textPrimary : colors.textSecondary }}>{t('pets.createNew')}</Text>
+              </Pressable>
+              <Pressable onPress={() => setActiveTab('join')} style={{ paddingBottom: 8, borderBottomWidth: 2, borderBottomColor: activeTab === 'join' ? colors.accent : 'transparent' }}>
+                <Text style={{ fontWeight: activeTab === 'join' ? 'bold' : 'normal', color: activeTab === 'join' ? colors.textPrimary : colors.textSecondary }}>{t('pets.joinWithCode')}</Text>
+              </Pressable>
+            </View>
+
+            {activeTab === 'create' ? (
+              <>
+                <View style={styles.formFields}>
               <Input
                 editable={!createPetMutation.isPending}
                 label={t("pets.name")}
@@ -171,7 +204,7 @@ export default function PetsScreen() {
               </View>
 
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Cinsiyet</Text>
+                <Text style={styles.fieldLabel}>{t("pets.gender")}</Text>
                 <View style={styles.chipRow}>
                   {genderOptions.map((opt) => (
                     <Pressable
@@ -190,7 +223,7 @@ export default function PetsScreen() {
 
               <Input
                 editable={!createPetMutation.isPending}
-                label="Irk / Cins"
+                label={t("pets.breed")}
                 onChangeText={setBreed}
                 placeholder={t("pets.breedPlaceholder")}
                 value={breed}
@@ -232,33 +265,66 @@ export default function PetsScreen() {
                 multiline
                 onChangeText={setNotes}
                 placeholder={t("pets.notePlaceholder")}
-                value={notes}
               />
             </View>
+          </>
+        ) : (
+          <View style={styles.formFields}>
+            <Input
+              autoCapitalize="characters"
+              editable={!acceptInviteMutation.isPending}
+              label={t("pets.inviteCode")}
+              onChangeText={setInviteCode}
+              placeholder={t("pets.inviteCodePlaceholder")}
+              value={inviteCode}
+              maxLength={6}
+            />
+          </View>
+        )}
 
-            {formError ? (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{formError}</Text>
+        {formError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{formError}</Text>
+          </View>
+        ) : null}
+
+            {activeTab === 'create' ? (
+              <View style={styles.formActions}>
+                <Button
+                  label={t("common.cancel")}
+                  variant="ghost"
+                  onPress={() => { resetForm(); setIsFormOpen(false); }}
+                  size="md"
+                  style={{ flex: 1 }}
+                />
+                <Button
+                  disabled={!canSubmit}
+                  label={t("common.save")}
+                  loading={createPetMutation.isPending}
+                  onPress={handleCreatePet}
+                  size="md"
+                  style={{ flex: 1 }}
+                />
               </View>
-            ) : null}
-
-            <View style={styles.formActions}>
-              <Button
-                label={t("common.cancel")}
-                variant="ghost"
-                onPress={() => { resetForm(); setIsFormOpen(false); }}
-                size="md"
-                style={styles.formBtnCancel}
-              />
-              <Button
-                disabled={!canSubmit}
-                label="Kaydet"
-                loading={createPetMutation.isPending}
-                onPress={handleCreatePet}
-                size="md"
-                style={styles.formBtnSave}
-              />
-            </View>
+            ) : (
+              <View style={styles.formActions}>
+                <Button
+                  label={t("common.cancel")}
+                  variant="ghost"
+                  onPress={() => { setIsFormOpen(false); setInviteCode(''); setFormError(null); }}
+                  size="md"
+                  style={{ flex: 1 }}
+                />
+                <Button
+                  disabled={normalizedInviteCode.length !== 6 || acceptInviteMutation.isPending}
+                  label={t("pets.join")}
+                  loading={acceptInviteMutation.isPending}
+                  onPress={handleJoinPet}
+                  size="md"
+                  style={{ flex: 1 }}
+                />
+              </View>
+            )}
           </Card>
         ) : (
           /* ── Pet List ── */
@@ -279,7 +345,7 @@ export default function PetsScreen() {
                   text={t("pets.noPetsDesc")}
                   action={
                     <Button
-                      label="Dost Ekle"
+                      label={t("pets.addPet")}
                       onPress={() => setIsFormOpen(true)}
                       size="sm"
                     />
@@ -307,10 +373,7 @@ export default function PetsScreen() {
                       <View style={styles.petInfo}>
                         <Text style={styles.petName}>{pet.name}</Text>
                         <Text style={styles.petMeta}>
-                          {pet.breed
-                            ? pet.breed
-                            : pet.species === 'cat' ? 'Kedi' : pet.species === 'dog' ? 'Köpek' :
-                              pet.species === 'bird' ? 'Kuş' : pet.species === 'rabbit' ? 'Tavşan' : 'Diğer'}
+                          {pet.breed ? pet.breed : t(`species.${pet.species}`)}
                           {pet.gender && pet.gender !== 'unknown'
                             ? ` · ${t(`genders.${pet.gender}`)}`
                             : ''}

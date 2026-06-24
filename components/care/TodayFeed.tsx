@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { CareTaskRow } from './CareTaskRow';
 import { Button } from '../ui/Button';
@@ -29,19 +30,21 @@ export function TodayFeed({
   pendingTaskId,
   tasks,
 }: TodayFeedProps) {
+  const { t } = useTranslation();
+
   return (
     <Card>
       <SectionHeader
         action={
           canEdit ? (
-            <Button label="+ Görev" onPress={onAddTask} size="sm" variant="secondary" />
+            <Button label={t('care.addTask')} onPress={onAddTask} size="sm" variant="secondary" />
           ) : null
         }
-        eyebrow="Bugün"
-        title="Bakım"
+        eyebrow={t('care.today')}
+        title={t('care.care')}
       />
 
-      {isLoading ? <LoadingState label="Görevler yükleniyor" /> : null}
+      {isLoading ? <LoadingState label={t('care.loadingTasks')} /> : null}
 
       {errorMessage ? (
         <View style={styles.errorBox}>
@@ -54,10 +57,10 @@ export function TodayFeed({
           icon="🧡"
           text={
             canEdit
-              ? 'Pet detayından ilk görevi ekle.'
-              : 'Görev eklendiğinde burada görünür.'
+              ? t('care.emptyFeedOwner')
+              : t('care.emptyFeedGuest')
           }
-          title="Akış boş."
+          title={t('care.feedEmpty')}
         />
       ) : null}
 

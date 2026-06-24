@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { LoadingState } from '../components/ui/LoadingState';
+import { logout } from '../lib/auth';
 import { careEventLabels, getCareErrorMessage } from '../lib/care';
 import { getInviteErrorMessage } from '../lib/invites';
 import { useCompleteOnboarding } from '../lib/mutations/useCompleteOnboarding';
@@ -39,37 +40,36 @@ type OnboardingStep = 'welcome' | 'pet' | 'tasks' | 'invite';
 
 const stepOrder: OnboardingStep[] = ['welcome', 'pet', 'tasks', 'invite'];
 
-const speciesOptions: Array<{ label: string; value: PetSpecies }> = [
-  { label: 'Kedi', value: 'cat' },
-  { label: 'Köpek', value: 'dog' },
-  { label: 'Kuş', value: 'bird' },
-  { label: 'Tavşan', value: 'rabbit' },
-  { label: 'Diğer', value: 'other' },
+const speciesOptions: Array<{ value: PetSpecies }> = [
+  { value: 'cat' },
+  { value: 'dog' },
+  { value: 'bird' },
+  { value: 'rabbit' },
+  { value: 'other' },
 ];
 
-const genderOptions: Array<{ label: string; value: PetGender }> = [
-  { label: 'Bilinmiyor', value: 'unknown' },
-  { label: 'Dişi', value: 'female' },
-  { label: 'Erkek', value: 'male' },
+const genderOptions: Array<{ value: PetGender }> = [
+  { value: 'unknown' },
+  { value: 'female' },
+  { value: 'male' },
 ];
 
 const taskTemplates: Array<{
   eventType: CareEventType;
-  title: string;
   scheduleType: CareScheduleType;
 }> = [
-  { eventType: 'food', title: 'Mama', scheduleType: 'daily' },
-  { eventType: 'water', title: 'Su', scheduleType: 'daily' },
-  { eventType: 'medicine', title: 'İlaç', scheduleType: 'daily' },
-  { eventType: 'litter', title: 'Kum', scheduleType: 'daily' },
-  { eventType: 'walk', title: 'Yürüyüş', scheduleType: 'daily' },
-  { eventType: 'bath', title: 'Banyo', scheduleType: 'weekly' },
-  { eventType: 'grooming', title: 'Tüy/Tarama', scheduleType: 'weekly' },
+  { eventType: 'food', scheduleType: 'daily' },
+  { eventType: 'water', scheduleType: 'daily' },
+  { eventType: 'medicine', scheduleType: 'daily' },
+  { eventType: 'litter', scheduleType: 'daily' },
+  { eventType: 'walk', scheduleType: 'daily' },
+  { eventType: 'bath', scheduleType: 'weekly' },
+  { eventType: 'grooming', scheduleType: 'weekly' },
 ];
 
-const inviteRoles: Array<{ label: string; value: Extract<PetRole, 'editor' | 'viewer'> }> = [
-  { label: 'Editör', value: 'editor' },
-  { label: 'Görüntüleyen', value: 'viewer' },
+const inviteRoles: Array<{ value: Extract<PetRole, 'editor' | 'viewer'> }> = [
+  { value: 'editor' },
+  { value: 'viewer' },
 ];
 
 function defaultTasksForSpecies(species: PetSpecies) {
@@ -143,6 +143,15 @@ export default function OnboardingScreen() {
     setStep(nextStep);
   }
 
+  async function handleLogout() {
+    setErrorMessage(null);
+    try {
+      await logout();
+    } catch (error) {
+      setErrorMessage(t('auth.defaultError'));
+    }
+  }
+
   async function finishOnboarding(petId?: string | null) {
     setErrorMessage(null);
 
@@ -210,14 +219,14 @@ export default function OnboardingScreen() {
         return false;
       }
 
-      return !existingTaskKeys.has(normalizeTaskKey(task.title, task.eventType, i18n.language));
+      return !existingTaskKeys.has(normalizeTaskKey(t(`careEvent.${task.eventType}`), task.eventType, i18n.language));
     });
 
     try {
       for (const task of tasksToCreate) {
         await createCareTaskMutation.mutateAsync({
           petId: createdPetId,
-          title: t(`careEvents.${task.eventType}`),
+          title: t(`careEvent.${task.eventType}`),
           eventType: task.eventType,
           scheduleType: task.scheduleType,
           dueTime: '',
@@ -317,14 +326,28 @@ export default function OnboardingScreen() {
                   onPress={handleExistingUserComplete}
                   size="md"
                 />
+                <Button
+                  label={t('auth.goBack')}
+                  onPress={handleLogout}
+                  variant="ghost"
+                  size="md"
+                />
               </Card>
             ) : (
-              <Button
-                disabled={petsQuery.isLoading}
-                label={t('onboarding.start')}
-                onPress={() => goToStep('pet')}
-                size="lg"
-              />
+              <View style={{ gap: spacing.md }}>
+                <Button
+                  disabled={petsQuery.isLoading}
+                  label={t('onboarding.start')}
+                  onPress={() => goToStep('pet')}
+                  size="lg"
+                />
+                <Button
+                  label={t('auth.goBack')}
+                  onPress={handleLogout}
+                  variant="ghost"
+                  size="md"
+                />
+              </View>
             )}
           </View>
         ) : null}
@@ -380,7 +403,7 @@ export default function OnboardingScreen() {
                       style={[styles.chip, selected && styles.chipSelected]}
                     >
                       <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                        {t(`species.${option.value}`)}
+                        {t(`gender.${option.value}`)}
                       </Text>
                     </Pressable>
                   );
@@ -411,15 +434,24 @@ export default function OnboardingScreen() {
               />
             )}
 
-            <View style={styles.actionRow}>
-              <Button label={t('onboarding.back')} onPress={() => goToStep('welcome')} size="md" variant="ghost" />
-              <Button
-                disabled={!canCreatePet}
-                label={t('onboarding.continue')}
-                loading={createPetMutation.isPending}
-                onPress={handleCreatePet}
-                size="md"
-                style={styles.primaryAction}
+            <View style={{ gap: spacing.md }}>
+              <View style={styles.actionRow}>
+                <Button label={t('onboarding.back')} onPress={() => goToStep('welcome')} size="md" variant="ghost" />
+                <Button
+                  disabled={!canCreatePet}
+                  label={t('onboarding.continue')}
+                  loading={createPetMutation.isPending}
+                  onPress={handleCreatePet}
+                  size="md"
+                  style={styles.primaryAction}
+                />
+              </View>
+              <Button 
+                label={t('onboarding.skipForNow')} 
+                onPress={() => finishOnboarding(null)} 
+                variant="subtle" 
+                size="md" 
+                loading={isCompleting}
               />
             </View>
           </Card>
@@ -445,7 +477,7 @@ export default function OnboardingScreen() {
                   >
                     <Text style={styles.taskEmoji}>{careEventEmoji[task.eventType]}</Text>
                     <Text style={[styles.taskTitle, selected && styles.taskTitleSelected]}>
-                      {t(`careEvents.${task.eventType}`)}
+                      {t(`careEvent.${task.eventType}`)}
                     </Text>
                     {selected ? (
                       <View style={styles.checkBadge}>
@@ -493,7 +525,7 @@ export default function OnboardingScreen() {
                     style={[styles.chip, selected && styles.chipSelected]}
                   >
                     <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                      {t(`species.${option.value}`)}
+                      {t(`roles.${option.value}`)}
                     </Text>
                   </Pressable>
                 );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../hooks/useAuth';
 import { Input } from '../../components/ui/Input';
@@ -9,6 +10,7 @@ import { Button } from '../../components/ui/Button';
 import { colors, layout, spacing, typography, fontWeight, radius } from '../../lib/theme';
 
 export default function DeactivateAccountScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { deactivateWithPassword } = useAuth();
   
@@ -18,17 +20,17 @@ export default function DeactivateAccountScreen() {
 
   const handleDeactivate = async () => {
     if (!password) {
-      setErrorMsg('İşleme devam etmek için şifrenizi girmelisiniz.');
+      setErrorMsg(t('settings.deactivatePasswordError'));
       return;
     }
 
     Alert.alert(
-      'Hesabı Sil',
-      'Hesabınız uygulamada pasife alınacak ve oturumunuz kapatılacaktır. Verileriniz güvenlik ve kayıt bütünlüğü için hemen fiziksel olarak silinmez. Onaylıyor musunuz?',
+      t('settings.deactivateConfirmTitle'),
+      t('settings.deactivateConfirmDesc'),
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('settings.cancel'), style: 'cancel' },
         {
-          text: 'Hesabı Sil',
+          text: t('settings.deactivateBtn'),
           style: 'destructive',
           onPress: async () => {
             setIsSaving(true);
@@ -39,7 +41,7 @@ export default function DeactivateAccountScreen() {
               // Router push will happen implicitly via auth state change listener in RouteGuard usually, 
               // but we don't need to do anything here because useAuth logs out on success.
             } catch (error: any) {
-              setErrorMsg(error.message || 'Hesap pasife alınırken bir hata oluştu. Şifrenizi doğru girdiğinizden emin olun.');
+              setErrorMsg(error.message || t('settings.deactivateError'));
               setIsSaving(false);
             }
           },
@@ -54,7 +56,7 @@ export default function DeactivateAccountScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>Hesabı Sil</Text>
+        <Text style={styles.topBarTitle}>{t('settings.deactivateTitle')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
@@ -67,20 +69,20 @@ export default function DeactivateAccountScreen() {
           <View style={styles.warningCard}>
             <Feather name="alert-triangle" size={24} color={colors.danger} />
             <View style={styles.warningTextContainer}>
-              <Text style={styles.warningTitle}>Dikkat</Text>
+              <Text style={styles.warningTitle}>{t('settings.deactivateWarningTitle')}</Text>
               <Text style={styles.warningDesc}>
-                Hesabınızı silmek (pasife almak) üzeresiniz. Bu işlem sonrası uygulamaya mevcut bilgilerinizle giriş yapamazsınız.
+                {t('settings.deactivateWarningDesc')}
               </Text>
             </View>
           </View>
 
           <Text style={styles.description}>
-            Güvenliğiniz için lütfen hesabınızı silmek istediğinizi doğrulamak adına mevcut şifrenizi girin.
+            {t('settings.deactivateDesc')}
           </Text>
 
           <Input
-            label="Şifre"
-            placeholder="Mevcut şifrenizi girin"
+            label={t('settings.currentPassword')}
+            placeholder={t('settings.currentPasswordPlaceholder')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -93,7 +95,7 @@ export default function DeactivateAccountScreen() {
           ) : null}
 
           <Button
-            label="Hesabı Sil"
+            label={t('settings.deactivateBtn')}
             onPress={handleDeactivate}
             loading={isSaving}
             disabled={!password || isSaving}

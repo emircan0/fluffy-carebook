@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../hooks/useAuth';
 import { Input } from '../../components/ui/Input';
@@ -9,6 +10,7 @@ import { Button } from '../../components/ui/Button';
 import { colors, layout, spacing, typography, fontWeight } from '../../lib/theme';
 
 export default function ChangeNameScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile, updateName } = useAuth();
   
@@ -24,7 +26,7 @@ export default function ChangeNameScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setErrorMsg('İsim boş olamaz.');
+      setErrorMsg(t('settings.emptyNameError'));
       return;
     }
 
@@ -35,7 +37,7 @@ export default function ChangeNameScreen() {
       await updateName(name);
       router.back();
     } catch (error: any) {
-      setErrorMsg(error.message || 'İsim güncellenirken bir hata oluştu.');
+      setErrorMsg(error.message || t('settings.updateError'));
     } finally {
       setIsSaving(false);
     }
@@ -47,7 +49,7 @@ export default function ChangeNameScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>İsim Değiştir</Text>
+        <Text style={styles.topBarTitle}>{t('settings.changeNameTitle')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
@@ -57,12 +59,12 @@ export default function ChangeNameScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <Text style={styles.description}>
-            Profilinizde ve diğer aile üyelerine görünecek adınızı buradan güncelleyebilirsiniz.
+            {t('settings.changeNameDesc')}
           </Text>
 
           <Input
-            label="Ad Soyad"
-            placeholder="Adınız ve Soyadınız"
+            label={t('settings.nameLabel')}
+            placeholder={t('settings.namePlaceholder')}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -74,7 +76,7 @@ export default function ChangeNameScreen() {
           ) : null}
 
           <Button
-            label="Kaydet"
+            label={t('settings.save')}
             onPress={handleSave}
             loading={isSaving}
             disabled={!name.trim() || isSaving}

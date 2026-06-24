@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, Pressable, UIManager } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, fontWeight, radius, spacing, typography } from '../../lib/theme';
@@ -88,11 +89,12 @@ function JSDatePickerFallback({
   minimumDate?: Date;
   maximumDate?: Date;
 }) {
+  const { t } = useTranslation();
   const [day, setDay] = useState(value.getDate());
   const [month, setMonth] = useState(value.getMonth()); // 0-indexed
   const [year, setYear] = useState(value.getFullYear());
 
-  const months = [
+  const months = (t('date.months', { returnObjects: true }) as string[]) || [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
   ];
@@ -144,7 +146,7 @@ function JSDatePickerFallback({
   return (
     <View style={styles.fallbackContainer}>
       <View style={styles.pickerColumn}>
-        <Text style={styles.columnLabel}>GÜN</Text>
+        <Text style={styles.columnLabel}>{t('date.day')}</Text>
         <Pressable onPress={() => handleDayChange('up')} style={styles.arrowBtn}>
           <Feather name="chevron-up" size={20} color={colors.accent} />
         </Pressable>
@@ -155,7 +157,7 @@ function JSDatePickerFallback({
       </View>
 
       <View style={[styles.pickerColumn, { flex: 1.5 }]}>
-        <Text style={styles.columnLabel}>AY</Text>
+        <Text style={styles.columnLabel}>{t('date.month')}</Text>
         <Pressable onPress={() => handleMonthChange('up')} style={styles.arrowBtn}>
           <Feather name="chevron-up" size={20} color={colors.accent} />
         </Pressable>
@@ -166,7 +168,7 @@ function JSDatePickerFallback({
       </View>
 
       <View style={styles.pickerColumn}>
-        <Text style={styles.columnLabel}>YIL</Text>
+        <Text style={styles.columnLabel}>{t('date.year')}</Text>
         <Pressable onPress={() => handleYearChange('up')} style={styles.arrowBtn}>
           <Feather name="chevron-up" size={20} color={colors.accent} />
         </Pressable>

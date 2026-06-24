@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/EmptyState';
@@ -25,19 +26,21 @@ export function UpcomingList({
   onToggleComplete,
   isToggling = false,
 }: UpcomingListProps) {
+  const { t } = useTranslation();
+
   return (
     <Card style={styles.card}>
-      <SectionHeader title="Yaklaşanlar" />
+      <SectionHeader title={t('care.upcoming')} />
 
       {reminders.length === 0 ? (
         <EmptyState
           icon="📅"
           text={
             canEdit
-              ? 'İlk aşı, parazit veya veteriner kontrolünü ekleyerek başlayalım.'
-              : 'Hatırlatıcı eklendiğinde burada görünür.'
+              ? t('care.upcomingEmptyOwner')
+              : t('care.upcomingEmptyGuest')
           }
-          title="Henüz hatırlatıcı yok."
+          title={t('care.upcomingEmptyTitle')}
         />
       ) : (
         <View style={styles.list}>

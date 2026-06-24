@@ -11,15 +11,16 @@ import {
 
 import { firebaseConfigError } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
+import i18n from './i18n';
 import type { Expense, ExpenseCategory } from '../types/app';
 
-export const expenseCategoryLabels: Record<ExpenseCategory, string> = {
-  food: 'Mama',
-  vet: 'Veteriner',
-  medicine: 'İlaç',
-  accessory: 'Kum/Aksesuar',
-  other: 'Diğer',
-};
+export const expenseCategoryLabels = {
+  get food() { return i18n.t('expense.categories.food'); },
+  get vet() { return i18n.t('expense.categories.vet'); },
+  get medicine() { return i18n.t('expense.categories.medicine'); },
+  get accessory() { return i18n.t('expense.categories.accessory'); },
+  get other() { return i18n.t('expense.categories.other'); },
+} as Record<ExpenseCategory, string>;
 
 export const expenseCategoryIcons: Record<ExpenseCategory, string> = {
   food: '🍽️',
@@ -113,7 +114,7 @@ export async function createExpense({
   const user = auth?.currentUser;
 
   if (!user) {
-    throw new Error('Masraf eklemek için giriş yapmalısınız.');
+    throw new Error(i18n.t('expense.addAuthError'));
   }
 
   const expensesRef = collection(db, 'pets', petId, 'expenses');
@@ -144,7 +145,7 @@ export async function deleteExpense(petId: string, expenseId: string) {
   const user = auth?.currentUser;
 
   if (!user) {
-    throw new Error('Masraf silmek için giriş yapmalısınız.');
+    throw new Error(i18n.t('expense.deleteAuthError'));
   }
 
   const expenseRef = doc(db, 'pets', petId, 'expenses', expenseId);
@@ -152,7 +153,7 @@ export async function deleteExpense(petId: string, expenseId: string) {
   await runTransaction(db, async (transaction) => {
     const docSnap = await transaction.get(expenseRef);
     if (!docSnap.exists()) {
-      throw new Error('Masraf bulunamadı.');
+      throw new Error(i18n.t('expense.notFoundError'));
     }
     
     transaction.update(expenseRef, {
@@ -176,7 +177,7 @@ export async function updateExpense({
   const user = auth?.currentUser;
 
   if (!user) {
-    throw new Error('Masraf güncellemek için giriş yapmalısınız.');
+    throw new Error(i18n.t('expense.updateAuthError'));
   }
 
   const expenseRef = doc(db, 'pets', petId, 'expenses', expenseId);
@@ -184,7 +185,7 @@ export async function updateExpense({
   await runTransaction(db, async (transaction) => {
     const docSnap = await transaction.get(expenseRef);
     if (!docSnap.exists()) {
-      throw new Error('Masraf bulunamadı.');
+      throw new Error(i18n.t('expense.notFoundError'));
     }
 
     transaction.update(expenseRef, {

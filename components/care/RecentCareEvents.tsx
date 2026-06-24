@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { formatCareEventTime } from './CareTaskRow';
 import { Card } from '../ui/Card';
@@ -13,21 +14,24 @@ type RecentCareEventsProps = {
   title?: string;
 };
 
-export function RecentCareEvents({ events, title = 'Son Hareketler' }: RecentCareEventsProps) {
+export function RecentCareEvents({ events, title }: RecentCareEventsProps) {
+  const { t } = useTranslation();
+  const displayTitle = title || t('care.recentEvents');
+
   return (
     <Card>
-      <SectionHeader subtitle="Aile içinde kimin ne yaptığını takip et." title={title} />
+      <SectionHeader subtitle={t('care.recentEventsSubtitle')} title={displayTitle} />
 
       {events.length === 0 ? (
         <EmptyState
           icon="🌤️"
-          text="Görevler tamamlandıkça burada kısa bir bakım akışı oluşacak."
-          title="Bugün hareket yok."
+          text={t('care.noEventsDesc')}
+          title={t('care.noEventsTitle')}
         />
       ) : (
         <View style={styles.list}>
           {events.slice(0, 6).map((event) => {
-            const doneAt = formatCareEventTime(event.doneAt);
+            const doneAt = formatCareEventTime(event.doneAt, t);
             const eventLabel = careEventLabels[event.eventType];
             const tint = careEventColors[event.eventType];
 
@@ -38,8 +42,8 @@ export function RecentCareEvents({ events, title = 'Son Hareketler' }: RecentCar
                 </View>
                 <View style={styles.eventBody}>
                   <Text style={styles.eventTitle} numberOfLines={2}>
-                    <Text style={{ color: colors.accent }}>{event.userName || 'Kullanıcı'}</Text>
-                    {', '}{event.taskTitle || eventLabel} tamamladı
+                    <Text style={{ color: colors.accent }}>{event.userName || t('care.user')}</Text>
+                    {t('care.completed', { task: event.taskTitle || eventLabel })}
                   </Text>
                   <Text style={styles.eventMeta}>{doneAt || eventLabel}</Text>
                 </View>

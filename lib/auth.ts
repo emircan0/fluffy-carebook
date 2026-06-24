@@ -28,6 +28,7 @@ import {
   defaultNotificationPreferences,
   normalizeNotificationPreferences,
 } from './notificationPreferences';
+import i18n from './i18n';
 import type { NotificationPreferences } from '../types/app';
 
 export type UserProfile = {
@@ -56,9 +57,9 @@ type LoginInput = {
 };
 
 export const firebaseConfigError =
-  'Firebase yapilandirmasi eksik. Lutfen .env.local icinde EXPO_PUBLIC_FIREBASE_* degerlerini tanimlayin.';
+  'Firebase config is missing.';
 export const accountInactiveError =
-  'Bu hesap pasife alinmis. Devam etmek icin yeni bir hesap olustur.';
+  'Account is inactive.';
 
 function requireFirebase() {
   if (!hasFirebaseConfig || !firebaseAuth || !firestore) {
@@ -73,33 +74,33 @@ function requireFirebase() {
 
 export function getAuthErrorMessage(error: unknown) {
   if (error instanceof Error && error.message === firebaseConfigError) {
-    return firebaseConfigError;
+    return i18n.t('auth.firebaseConfigError') || firebaseConfigError;
   }
 
   if (error instanceof Error && error.message === accountInactiveError) {
-    return accountInactiveError;
+    return i18n.t('auth.accountInactiveError') || accountInactiveError;
   }
 
   const code = (error as { code?: string } | undefined)?.code;
 
   switch (code) {
     case 'auth/email-already-in-use':
-      return 'Bu e-posta ile kayitli bir hesap var.';
+      return i18n.t('auth.emailInUse');
     case 'auth/invalid-email':
-      return 'Gecerli bir e-posta adresi girin.';
+      return i18n.t('auth.invalidEmail');
     case 'auth/invalid-credential':
     case 'auth/user-not-found':
     case 'auth/wrong-password':
-      return 'E-posta veya sifre hatali.';
+      return i18n.t('auth.invalidCredential');
     case 'auth/weak-password':
-      return 'Sifre en az 6 karakter olmali.';
+      return i18n.t('auth.weakPassword');
     case 'auth/operation-not-allowed':
     case 'auth/admin-restricted-operation':
-      return 'Misafir girişi Firebase Console üzerinde etkin değil. Lütfen Authentication > Sign-in method altından Anonim (Anonymous) girişi aktif edin.';
+      return i18n.t('auth.operationNotAllowed');
     case 'permission-denied':
-      return 'Bu islem icin yetkiniz yok. Firestore rules ayarlarini kontrol edin.';
+      return i18n.t('auth.permissionDenied');
     default:
-      return 'Bir hata olustu. Lutfen tekrar deneyin.';
+      return i18n.t('auth.defaultError');
   }
 }
 
@@ -107,7 +108,7 @@ function profileFromUser(user: User, fullName?: string | null): UserProfile {
   return {
     id: user.uid,
     email: user.email ?? null,
-    fullName: fullName ?? user.displayName ?? (user.isAnonymous ? 'Misafir Kullanıcı' : null),
+    fullName: fullName ?? user.displayName ?? (user.isAnonymous ? i18n.t('auth.guestUser') : null),
     avatarUrl: user.photoURL ?? null,
     accountStatus: 'active',
     deactivatedAt: null,
@@ -192,7 +193,7 @@ export async function loginWithEmail({ email, password }: LoginInput) {
 export async function loginAsGuest() {
   const { auth } = requireFirebase();
   const credential = await signInAnonymously(auth);
-  const profile = await ensureUserProfile(credential.user, 'Misafir Kullanıcı');
+  const profile = await ensureUserProfile(credential.user, i18n.t('auth.guestUser'));
   assertActiveProfile(profile);
 
   return {
@@ -203,7 +204,7 @@ export async function loginAsGuest() {
 
 export async function deactivateCurrentUserAccount(userId: string) {
   if (!userId) {
-    throw new Error('Hesap islemi icin giris yapmalisiniz.');
+    throw new Error(i18n.t('auth.loginRequired'));
   }
 
   const { db } = requireFirebase();
@@ -268,10 +269,10 @@ export async function loginWithAppleCredential(idToken: string, rawNonce?: strin
 export async function updateUserName(newName: string) {
   const { auth, db } = requireFirebase();
   const user = auth.currentUser;
-  if (!user) throw new Error('Oturum acik degil.');
+  if (!user) throw new Error(i18n.t('auth.sessionClosed') || 'Oturum acik degil.');
 
   const trimmedName = newName.trim();
-  if (!trimmedName) throw new Error('Isim bos olamaz.');
+  if (!trimmedName) throw new Error(i18n.t('auth.nameEmpty') || 'Isim bos olamaz.');
 
   await updateProfile(user, { displayName: trimmedName });
 
@@ -285,7 +286,7 @@ export async function updateUserName(newName: string) {
 export async function changeUserPassword(currentPass: string, newPass: string) {
   const { auth } = requireFirebase();
   const user = auth.currentUser;
-  if (!user || !user.email) throw new Error('Oturum acik degil veya e-posta yok.');
+  if (!user || !user.email) throw new Error(i18n.t('auth.sessionClosed') || 'Oturum acik degil veya e-posta yok.');
 
   const credential = EmailAuthProvider.credential(user.email, currentPass);
   await reauthenticateWithCredential(user, credential);
@@ -295,7 +296,7 @@ export async function changeUserPassword(currentPass: string, newPass: string) {
 export async function deactivateAccountWithPassword(password: string) {
   const { auth, db } = requireFirebase();
   const user = auth.currentUser;
-  if (!user || !user.email) throw new Error('Oturum acik degil veya e-posta yok.');
+  if (!user || !user.email) throw new Error(i18n.t('auth.sessionClosed') || 'Oturum acik degil veya e-posta yok.');
 
   const credential = EmailAuthProvider.credential(user.email, password);
   await reauthenticateWithCredential(user, credential);

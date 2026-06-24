@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Switch, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../hooks/useAuth';
 import { useRegisterPushToken } from '../../lib/mutations/useRegisterPushToken';
@@ -17,6 +18,7 @@ import { Button } from '../../components/ui/Button';
 import type { NotificationPreferences, ReminderType } from '../../types/app';
 
 export default function NotificationsSettingsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { profile } = useAuth();
   
@@ -70,7 +72,7 @@ export default function NotificationsSettingsScreen() {
       setNotificationMessage(result.message);
     } catch (error) {
       setNotificationStatus('error');
-      setNotificationMessage(error instanceof Error ? error.message : 'Bildirimler açılamadı.');
+      setNotificationMessage(error instanceof Error ? error.message : t('settings.enableError'));
     }
   }
 
@@ -84,65 +86,65 @@ export default function NotificationsSettingsScreen() {
 
     try {
       await updateNotificationPreferencesMutation.mutateAsync(nextPreferences);
-      setPreferenceMessage('Bildirim tercihleri güncellendi.');
+      setPreferenceMessage(t('settings.preferencesUpdated'));
     } catch (error) {
-      setPreferenceMessage(error instanceof Error ? error.message : 'Tercihler güncellenemedi.');
+      setPreferenceMessage(error instanceof Error ? error.message : t('settings.preferencesError'));
     }
   }
 
   const notificationCardState = useMemo(() => {
     if (registerPushTokenMutation.isPending) {
       return {
-        label: 'Kaydediliyor',
-        description: 'Cihaz bildirime hazırlanıyor.',
-        buttonLabel: 'Kaydediliyor',
+        label: t('settings.saving'),
+        description: t('settings.savingDesc'),
+        buttonLabel: t('settings.saving'),
         disabled: true,
       };
     }
 
     if (notificationStatus === 'registered') {
       return {
-        label: 'Bildirim açık',
-        description: notificationMessage ?? 'Token kaydedildi.',
-        buttonLabel: 'Bildirimler açık',
+        label: t('settings.enabled'),
+        description: notificationMessage ?? t('settings.enabledDesc'),
+        buttonLabel: t('settings.enabled'),
         disabled: true,
       };
     }
 
     if (notificationStatus === 'granted') {
       return {
-        label: 'İzin verildi',
-        description: notificationMessage ?? 'İzin var. Bu cihazı hatırlatmalar için kaydet.',
-        buttonLabel: 'Token kaydet',
+        label: t('settings.granted'),
+        description: notificationMessage ?? t('settings.grantedDesc'),
+        buttonLabel: t('settings.saveToken'),
         disabled: false,
       };
     }
 
     if (notificationStatus === 'unsupported') {
       return {
-        label: 'Desteklenmiyor',
-        description: notificationMessage ?? 'Bu platformda bildirim desteği yok.',
-        buttonLabel: 'Mobil cihazda dene',
+        label: t('settings.unsupported'),
+        description: notificationMessage ?? t('settings.unsupportedDesc'),
+        buttonLabel: t('settings.tryOnMobile'),
         disabled: true,
       };
     }
 
     if (notificationStatus === 'denied') {
       return {
-        label: 'İzin verilmedi',
-        description: notificationMessage ?? 'Cihaz ayarlarından daha sonra açabilirsin.',
-        buttonLabel: 'Tekrar dene',
+        label: t('settings.denied'),
+        description: notificationMessage ?? t('settings.deniedDesc'),
+        buttonLabel: t('settings.tryAgain'),
         disabled: false,
       };
     }
 
     return {
-      label: 'Bildirim izni verilmedi',
-      description: notificationMessage ?? 'Aşı, ilaç ve veteriner hatırlatmalarını kaçırmamak için bildirimleri aç.',
-      buttonLabel: 'Bildirimleri aç',
+      label: t('settings.notGranted'),
+      description: notificationMessage ?? t('settings.notGrantedDesc'),
+      buttonLabel: t('settings.enableNotifications'),
       disabled: false,
     };
-  }, [notificationMessage, notificationStatus, registerPushTokenMutation.isPending]);
+  }, [notificationMessage, notificationStatus, registerPushTokenMutation.isPending, t]);
 
   return (
     <View style={styles.screen}>
@@ -150,26 +152,27 @@ export default function NotificationsSettingsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>Bildirim Tercihleri</Text>
+        <Text style={styles.topBarTitle}>{t('settings.notificationsTitle')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.notificationCard}>
-          <View style={styles.notificationIcon}>
-            <Feather name="bell" size={20} color={colors.accent} />
-          </View>
-          <View style={styles.notificationCopy}>
-            <Text style={styles.notificationTitle}>Bildirimler</Text>
-            <Text style={styles.notificationDesc}>{notificationCardState.description}</Text>
-            <Text style={styles.notificationStatus}>{notificationCardState.label}</Text>
+          <View style={styles.notificationHeader}>
+            <View style={styles.notificationIcon}>
+              <Feather name="bell" size={20} color={colors.accent} />
+            </View>
+            <View style={styles.notificationCopy}>
+              <Text style={styles.notificationTitle}>{t('settings.notifications')}</Text>
+              <Text style={styles.notificationDesc}>{notificationCardState.description}</Text>
+              <Text style={styles.notificationStatus}>{notificationCardState.label}</Text>
+            </View>
           </View>
           <Button
             disabled={notificationCardState.disabled}
             label={notificationCardState.buttonLabel}
             loading={registerPushTokenMutation.isPending}
             onPress={handleEnableNotifications}
-            size="sm"
             variant={notificationCardState.disabled ? 'ghost' : 'secondary'}
             style={styles.notificationButton}
           />
@@ -181,9 +184,9 @@ export default function NotificationsSettingsScreen() {
               <Feather name="sliders" size={20} color={colors.accent} />
             </View>
             <View style={styles.notificationCopy}>
-              <Text style={styles.notificationTitle}>Tercihler</Text>
+              <Text style={styles.notificationTitle}>{t('settings.preferences')}</Text>
               <Text style={styles.notificationDesc}>
-                Hangi hatırlatmalar için bildirim almak istediğini seç.
+                {t('settings.preferencesDesc')}
               </Text>
             </View>
           </View>
@@ -192,7 +195,7 @@ export default function NotificationsSettingsScreen() {
             <View style={styles.preferenceWarning}>
               <Feather name="bell-off" size={15} color={colors.warning} />
               <Text style={styles.preferenceWarningText}>
-                Bildirim almak için cihaz bildirim iznini açmalısın.
+                {t('settings.deviceWarning')}
               </Text>
             </View>
           ) : null}
@@ -278,15 +281,18 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
   },
   notificationCard: {
-    alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.surfaceBorder,
     borderRadius: radius.xl,
     borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.base,
+    gap: spacing.lg,
     padding: spacing.lg,
     ...shadows.sm,
+  },
+  notificationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.base,
   },
   notificationIcon: {
     alignItems: 'center',

@@ -168,6 +168,9 @@ export const careEventEmoji = {
   walk:     '🦮',
   bath:     '🛁',
   grooming: '✂️',
+  play:     '🎾',
+  training: '🎯',
+  teeth:    '🪥',
   other:    '🐾',
 } as const;
 
@@ -179,5 +182,8 @@ export const careEventColors = {
   walk:     '#8EA48C',
   bath:     '#8EA48C',
   grooming: '#8EA48C',
+  play:     '#8EA48C',
+  training: '#8EA48C',
+  teeth:    '#8EA48C',
   other:    '#8EA48C',
 } as const;

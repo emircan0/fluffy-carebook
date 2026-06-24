@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Pressable, ScrollView, StyleSheet, Text, View, Share, Platform, Modal, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,15 +29,10 @@ import { usePetMembers } from '../../lib/queries/usePetMembers';
 import { usePetRealtime } from '../../lib/realtime/usePetRealtime';
 import { useMeasurements } from '../../lib/queries/useMeasurements';
 import { useCreateMeasurement } from '../../lib/mutations/useCreateMeasurement';
+import { useRemoveMember } from '../../lib/mutations/useRemoveMember';
 import { careEventEmoji, colors, layout, petSpeciesEmoji, radius, spacing, fontWeight, typography, shadows } from '../../lib/theme';
 import { useAuthStore } from '../../store/authStore';
 import type { CareEvent, CareEventType, CareScheduleType, CareTask, PetRole } from '../../types/app';
-
-const roleLabels: Record<PetRole, string> = {
-  owner: 'Sahip',
-  editor: 'Editör',
-  viewer: 'Görüntüleyen',
-};
 
 const roleBadgeVariants: Record<PetRole, 'roleOwner' | 'roleEditor' | 'roleViewer'> = {
   owner: 'roleOwner',
@@ -44,28 +40,10 @@ const roleBadgeVariants: Record<PetRole, 'roleOwner' | 'roleEditor' | 'roleViewe
   viewer: 'roleViewer',
 };
 
-const eventTypeOptions: Array<{ label: string; value: CareEventType }> = [
-  { label: 'Mama', value: 'food' },
-  { label: 'İlaç', value: 'medicine' },
-  { label: 'Kum', value: 'litter' },
-  { label: 'Su', value: 'water' },
-  { label: 'Yürüyüş', value: 'walk' },
-  { label: 'Banyo', value: 'bath' },
-  { label: 'Tüy/Tarama', value: 'grooming' },
-  { label: 'Diğer', value: 'other' },
-];
-
-const scheduleOptions: Array<{ label: string; value: CareScheduleType }> = [
-  { label: 'Tek sefer', value: 'none' },
-  { label: 'Günlük', value: 'daily' },
-  { label: 'Haftalık', value: 'weekly' },
-  { label: 'Aylık', value: 'monthly' },
-];
-
-function getPetAge(birthDateString: string | null | undefined): string {
-  if (!birthDateString) return 'Yaş bilinmiyor';
+function getPetAge(birthDateString: string | null | undefined, t: any): string {
+  if (!birthDateString) return t('pet.ageUnknown');
   const birthDate = new Date(birthDateString);
-  if (isNaN(birthDate.getTime())) return 'Yaş bilinmiyor';
+  if (isNaN(birthDate.getTime())) return t('pet.ageUnknown');
 
   const today = new Date();
   let years = today.getFullYear() - birthDate.getFullYear();
@@ -86,18 +64,18 @@ function getPetAge(birthDateString: string | null | undefined): string {
 
   if (years > 0) {
     if (months > 0) {
-      return `${years} yaş ${months} aylık`;
+      return `${years} ${t('pet.years')} ${months} ${t('pet.months')}`;
     }
-    return `${years} yaşında`;
+    return `${years} ${t('pet.yearsOld')}`;
   }
   
   if (months > 0) {
-    return `${months} aylık`;
+    return `${months} ${t('pet.monthsOld')}`;
   }
   
   const diffTime = Math.abs(today.getTime() - birthDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return `${diffDays} günlük`;
+  return `${diffDays} ${t('pet.daysOld')}`;
 }
 
 function formatMeasurementDate(dateVal: any, includeYear = true): string {
@@ -118,6 +96,7 @@ function formatMeasurementDate(dateVal: any, includeYear = true): string {
 }
 
 export default function PetDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ id?: string }>();
@@ -147,6 +126,7 @@ export default function PetDetailScreen() {
   // Measurements logic
   const measurementsQuery = useMeasurements(petId ?? null);
   const createMeasurementMutation = useCreateMeasurement();
+  const removeMemberMutation = useRemoveMember(petId);
   const measurements = measurementsQuery.data ?? [];
 
   const [weight, setWeight] = useState('');
@@ -215,12 +195,12 @@ export default function PetDetailScreen() {
   const getMemberDisplayName = useCallback((member: typeof members[0]) => {
     if (member.userId === user?.uid) {
       const authProfile = useAuthStore.getState().profile;
-      return authProfile?.fullName ? `${authProfile.fullName} (Ben)` : 'Ben';
+      return authProfile?.fullName ? `${authProfile.fullName} (${t('common.me')})` : t('common.me');
     }
     if (member.fullName) return member.fullName;
     if (member.email) return member.email;
-    return `Kullanıcı (${member.userId.substring(0, 6)})`;
-  }, [user?.uid]);
+    return `${t('care.user')} (${member.userId.substring(0, 6)})`;
+  }, [user?.uid, t]);
 
   const filteredEvents = useMemo(() => {
     const now = new Date();
@@ -259,6 +239,9 @@ export default function PetDetailScreen() {
       litter: 0,
       bath: 0,
       grooming: 0,
+      play: 0,
+      training: 0,
+      teeth: 0,
       other: 0,
     };
     filteredEvents.forEach(event => {
@@ -329,7 +312,7 @@ export default function PetDetailScreen() {
         role: inviteRole,
         invitedByName: null,
       });
-      setInviteLink(`/invite/${invite.token}`);
+      setInviteLink(invite.token);
     } catch (error) {
       setInviteError(getInviteErrorMessage(error));
     }
@@ -338,28 +321,27 @@ export default function PetDetailScreen() {
   async function handleCopyInviteLink() {
     if (!inviteLink) return;
     await Clipboard.setStringAsync(inviteLink);
-    setCopyStatus('Davet linki kopyalandı.');
+    setCopyStatus(t('invite.copySuccess'));
   }
 
   async function handleShareInvite() {
     if (!inviteLink || !pet) return;
     try {
-      const code = inviteLink.split('/').pop() || '';
-      const shareMessage = `YuvioPet'te ${pet.name} dostumuzun bakım ekibine ${
-        inviteRole === 'editor' ? 'Editör' : 'Görüntüleyici'
-      } olarak katılmak için davetlisiniz!\n\nDavet Kodu: ${code}\n\nKatılmak için bağlantıya tıklayın:\nhttps://yuviopet.app/invite/${code}`;
+      const code = inviteLink;
+      const roleText = inviteRole === 'editor' ? t('roles.editor') : t('roles.viewer');
+      const shareMessage = t('invite.shareMessage', { petName: pet.name, role: roleText, code: code });
       
       await Share.share({
         message: shareMessage,
       });
     } catch (error) {
-      console.error('Paylaşım hatası:', error);
+      console.error(t('invite.shareError'), error);
     }
   }
 
   async function handleCreateCareTask() {
     if (!pet || !taskTitle.trim()) {
-      setCareError('Görev başlığı zorunlu.');
+      setCareError(t('care.missingTaskTitle'));
       return;
     }
     setCareError(null);
@@ -397,12 +379,12 @@ export default function PetDetailScreen() {
     if (!petId) return;
     const weightNum = parseFloat(weight);
     if (isNaN(weightNum) || weightNum <= 0) {
-      setMeasurementError('Lütfen geçerli bir kilo (kg) değeri girin.');
+      setMeasurementError(t('pet.invalidWeight'));
       return;
     }
     const heightNum = height ? parseFloat(height) : null;
     if (height && (isNaN(heightNum!) || heightNum! <= 0)) {
-      setMeasurementError('Lütfen geçerli bir boy (cm) değeri girin.');
+      setMeasurementError(t('pet.invalidHeight'));
       return;
     }
 
@@ -421,7 +403,7 @@ export default function PetDetailScreen() {
       setMeasurementDate(new Date());
       setIsAddMeasurementOpen(false);
     } catch (err: any) {
-      setMeasurementError(err.message || 'Ölçüm eklenirken bir hata oluştu.');
+      setMeasurementError(err.message || t('pet.addMeasurementError'));
     }
   }
 
@@ -433,7 +415,7 @@ export default function PetDetailScreen() {
       ]} 
       keyboardShouldPersistTaps="handled"
     >
-      <Stack.Screen options={{ title: pet?.name ?? 'Detaylar' }} />
+      <Stack.Screen options={{ title: pet?.name ?? t('pet.details') }} />
       
       <View style={styles.topBar}>
         <Pressable 
@@ -443,16 +425,16 @@ export default function PetDetailScreen() {
         >
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>{pet?.name ?? 'Detaylar'}</Text>
+        <Text style={styles.topBarTitle}>{pet?.name ?? t('pet.details')}</Text>
         <View style={{ width: 32 }} />
       </View>
 
       <View style={styles.container}>
-        {petQuery.isLoading ? <LoadingState label="Pet bilgileri yükleniyor..." /> : null}
+        {petQuery.isLoading ? <LoadingState label={t('pet.loading')} /> : null}
 
         {petQuery.error ? (
           <Card style={styles.card}>
-            <Text style={styles.error}>{getPetErrorMessage(petQuery.error)}</Text>
+            <Text style={styles.error}>{getPetErrorMessage(petQuery.error) || t('pet.loadError')}</Text>
           </Card>
         ) : null}
 
@@ -463,21 +445,21 @@ export default function PetDetailScreen() {
                 <Text style={styles.petAvatarText}>{petSpeciesEmoji[pet.species]}</Text>
               </View>
               <View style={styles.petCopy}>
-                <Text style={styles.eyebrow}>PROFiL</Text>
+                <Text style={styles.eyebrow}>{t('pet.profile')}</Text>
                 <Text style={styles.title}>{pet.name}</Text>
                 <View style={styles.badgeRow}>
                   {currentMember ? (
-                    <Badge label={roleLabels[currentMember.role]} variant={roleBadgeVariants[currentMember.role]} />
+                    <Badge label={t(`roles.${currentMember.role}`)} variant={roleBadgeVariants[currentMember.role]} />
                   ) : null}
                 </View>
               </View>
             </View>
             {realtime.error ? <Text style={styles.error}>{realtime.error}</Text> : null}
             <View style={styles.petStatsRow}>
-              {pet.breed ? <Text style={styles.description}>Irk: {pet.breed}</Text> : null}
-              <Text style={styles.description}>Yaş: {getPetAge(pet.birthDate)}</Text>
+              {pet.breed ? <Text style={styles.description}>{t('pet.breed')}: {pet.breed}</Text> : null}
+              <Text style={styles.description}>{t('pet.age')}: {getPetAge(pet.birthDate, t)}</Text>
             </View>
-            {pet.notes ? <Text style={styles.description}>Not: {pet.notes}</Text> : null}
+            {pet.notes ? <Text style={styles.description}>{t('pet.notes')}: {pet.notes}</Text> : null}
           </Card>
         ) : null}
 
@@ -494,11 +476,11 @@ export default function PetDetailScreen() {
                 ]}
               >
                 <Feather name="plus" size={18} color={colors.accentDark} />
-                <Text style={styles.formToggleBtnText}>Ölçüm Ekle</Text>
+                <Text style={styles.formToggleBtnText}>{t('pet.addMeasurement')}</Text>
               </Pressable>
             }
-            subtitle="Evcil dostunuzun kilo ve boy gelişimini takip edin."
-            title="Gelişim Takibi 📈"
+            subtitle={t('pet.measurementSubtitle')}
+            title={t('pet.measurementTitle')}
           />
 
           {/* Teşvik / Uyarı Bildirimi */}
@@ -507,8 +489,8 @@ export default function PetDetailScreen() {
               <Feather name="alert-circle" size={20} color={colors.accentDark} style={styles.encouragementIcon} />
               <Text style={styles.encouragementText}>
                 {lastMeasurement
-                  ? `${pet?.name ?? 'Pet'}'in kilosunu en son ${daysSinceLastUpdate} gün önce güncelledin. Düzenli ölçüm girmek onun sağlığı için çok önemlidir! 🐾`
-                  : `${pet?.name ?? 'Pet'}'in henüz gelişim verisi girilmemiş. Gelişimi takip etmeye başlamak için ilk ölçümü girin! 🐾`}
+                  ? t('pet.encouragementUpdated', { petName: pet?.name ?? t('invite.pet'), days: daysSinceLastUpdate })
+                  : t('pet.encouragementNew', { petName: pet?.name ?? t('invite.pet') })}
               </Text>
             </View>
           )}
@@ -516,7 +498,7 @@ export default function PetDetailScreen() {
           {/* Ölçüm İstatistikleri */}
           <View style={styles.measurementStatsRow}>
             <View style={styles.measurementStatCard}>
-              <Text style={styles.measurementStatLabel}>Kilo (kg)</Text>
+              <Text style={styles.measurementStatLabel}>{t('pet.weight')}</Text>
               <Text style={styles.measurementStatValue}>
                 {lastMeasurement ? `${lastMeasurement.weight} kg` : '—'}
               </Text>
@@ -536,7 +518,7 @@ export default function PetDetailScreen() {
             </View>
 
             <View style={styles.measurementStatCard}>
-              <Text style={styles.measurementStatLabel}>Boy (cm)</Text>
+              <Text style={styles.measurementStatLabel}>{t('pet.height')}</Text>
               <Text style={styles.measurementStatValue}>
                 {lastMeasurement?.height ? `${lastMeasurement.height} cm` : '—'}
               </Text>
@@ -559,7 +541,7 @@ export default function PetDetailScreen() {
           {/* Son 3 Ölçüm Zaman Tüneli */}
           {measurements.length > 0 ? (
             <View style={styles.timelineContainer}>
-              <Text style={styles.timelineTitle}>Son Ölçümler</Text>
+              <Text style={styles.timelineTitle}>{t('pet.recentMeasurements')}</Text>
               {measurements.slice(0, 3).map((item, idx) => (
                 <View key={item.id} style={styles.timelineItem}>
                   <View style={styles.timelineIndicator}>
@@ -580,7 +562,7 @@ export default function PetDetailScreen() {
               
               {measurements.length > 3 && (
                 <Button
-                  label="Tüm Geçmişi Gör"
+                  label={t('pet.seeAllHistory')}
                   variant="ghost"
                   size="sm"
                   onPress={() => setIsHistoryOpen(true)}
@@ -591,18 +573,18 @@ export default function PetDetailScreen() {
           ) : (
             <EmptyState
               icon="⚖️"
-              text="Henüz gelişim verisi eklenmemiş. Ölçüm ekleyerek kilo ve boy gelişimini buradan takip edin."
-              title="Ölçüm bulunamadı"
+              text={t('pet.noMeasurementDesc')}
+              title={t('pet.noMeasurement')}
             />
           )}
         </Card>
 
         {/* ── Üyeler ── */}
         <Card style={styles.card}>
-          <SectionHeader subtitle={`${activeMembers.length}/2 aktif bakıcı`} title="Aile Üyeleri" />
-          {membersQuery.isLoading ? <LoadingState label="Üyeler yükleniyor..." /> : null}
+          <SectionHeader subtitle={t('pet.membersSubtitle', { activeCount: activeMembers.length })} title={t('pet.members')} />
+          {membersQuery.isLoading ? <LoadingState label={t('pet.membersLoading')} /> : null}
           {members.length === 0 && !membersQuery.isLoading ? (
-            <EmptyState text="Bakıcılar burada listelenecek." title="Henüz üye görünmüyor." />
+            <EmptyState text={t('pet.membersEmptyDesc')} title={t('pet.membersEmptyTitle')} />
           ) : null}
           <View style={styles.memberList}>
             {members.map((member) => (
@@ -610,10 +592,22 @@ export default function PetDetailScreen() {
                 <View style={styles.memberInfo}>
                   <Text style={styles.memberName}>{getMemberDisplayName(member)}</Text>
                   <Text style={styles.muted}>
-                    {member.status === 'active' ? 'Aktif' : 'Davet Edildi'}
+                    {member.status === 'active' ? t('inviteStatus.active') : t('inviteStatus.invited')}
                   </Text>
                 </View>
-                <Badge label={roleLabels[member.role]} variant={roleBadgeVariants[member.role]} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Badge label={t(`roles.${member.role}`)} variant={roleBadgeVariants[member.role]} />
+                  {isOwner && member.role !== 'owner' && member.userId !== user?.uid ? (
+                    <Button 
+                      label="Sil" 
+                      variant="danger" 
+                      size="sm" 
+                      style={{ paddingHorizontal: 8, paddingVertical: 4, height: 'auto' }}
+                      onPress={() => removeMemberMutation.mutate(member.userId)}
+                      loading={removeMemberMutation.isPending && removeMemberMutation.variables === member.userId}
+                    />
+                  ) : null}
+                </View>
               </View>
             ))}
           </View>
@@ -634,37 +628,37 @@ export default function PetDetailScreen() {
                 >
                   <Feather name={isAddTaskOpen ? 'chevron-up' : 'plus'} size={18} color={colors.accentDark} />
                   <Text style={styles.formToggleBtnText}>
-                    {isAddTaskOpen ? 'Kapat' : 'Görev Ekle'}
+                    {isAddTaskOpen ? t('common.close') : t('care.addTask')}
                   </Text>
                 </Pressable>
               ) : null
             }
-            subtitle={canEditCare ? 'Günlük rutinleri planlayın ve düzenleyin.' : 'Bu pet için okuma modundasınız.'}
-            title="Bakım Görevleri"
+            subtitle={canEditCare ? t('care.tasksSubtitleEdit') : t('care.tasksSubtitleRead')}
+            title={t('care.tasksTitle')}
           />
 
           {canEditCare && isAddTaskOpen ? (
             <View style={styles.taskForm}>
               <Input
                 editable={!createCareTaskMutation.isPending}
-                label="Görev Adı"
+                label={t('care.taskName')}
                 onChangeText={setTaskTitle}
-                placeholder="Örn: Sabah Maması, Yürüyüş..."
+                placeholder={t('care.taskNamePlaceholder')}
                 value={taskTitle}
               />
 
               <View style={styles.field}>
-                <Text style={styles.label}>Tür</Text>
+                <Text style={styles.label}>{t('care.taskType')}</Text>
                 <View style={styles.optionGrid}>
-                  {eventTypeOptions.map((option) => (
+                  {(['food', 'medicine', 'litter', 'water', 'walk', 'bath', 'grooming', 'play', 'training', 'teeth', 'other'] as CareEventType[]).map((val) => (
                     <Pressable
                       accessibilityRole="button"
-                      key={option.value}
-                      onPress={() => setTaskEventType(option.value)}
-                      style={[styles.option, taskEventType === option.value && styles.optionSelected]}
+                      key={val}
+                      onPress={() => setTaskEventType(val)}
+                      style={[styles.option, taskEventType === val && styles.optionSelected]}
                     >
-                      <Text style={[styles.optionText, taskEventType === option.value && styles.optionTextSelected]}>
-                        {careEventEmoji[option.value]} {option.label}
+                      <Text style={[styles.optionText, taskEventType === val && styles.optionTextSelected]}>
+                        {careEventEmoji[val]} {t(`careEvent.${val}`)}
                       </Text>
                     </Pressable>
                   ))}
@@ -672,17 +666,17 @@ export default function PetDetailScreen() {
               </View>
 
               <View style={styles.field}>
-                <Text style={styles.label}>Tekrar</Text>
+                <Text style={styles.label}>{t('care.repeat')}</Text>
                 <View style={styles.optionGrid}>
-                  {scheduleOptions.map((option) => (
+                  {(['none', 'daily', 'weekly', 'monthly'] as CareScheduleType[]).map((val) => (
                     <Pressable
                       accessibilityRole="button"
-                      key={option.value}
-                      onPress={() => setTaskScheduleType(option.value)}
-                      style={[styles.option, taskScheduleType === option.value && styles.optionSelected]}
+                      key={val}
+                      onPress={() => setTaskScheduleType(val)}
+                      style={[styles.option, taskScheduleType === val && styles.optionSelected]}
                     >
-                      <Text style={[styles.optionText, taskScheduleType === option.value && styles.optionTextSelected]}>
-                        {option.label}
+                      <Text style={[styles.optionText, taskScheduleType === val && styles.optionTextSelected]}>
+                        {t(`careSchedule.${val}`)}
                       </Text>
                     </Pressable>
                   ))}
@@ -728,26 +722,36 @@ export default function PetDetailScreen() {
           ) : null}
 
           <View style={styles.taskList}>
-            {careTasks.map((task) => (
-              <CareTaskRow
-                canEdit={canEditCare}
-                isPending={markCareEventMutation.isPending}
-                key={task.id}
-                lastEvent={lastEventByTaskId.get(task.id)}
-                onDone={handleMarkDone}
-                task={task}
-              />
-            ))}
+            {(['daily', 'weekly', 'monthly', 'none'] as CareScheduleType[]).map((schedule) => {
+              const tasksInSchedule = careTasks.filter((t) => t.scheduleType === schedule);
+              if (tasksInSchedule.length === 0) return null;
+              
+              return (
+                <View key={schedule} style={styles.taskGroup}>
+                  <Text style={styles.taskGroupTitle}>{t(`careSchedule.${schedule}`)}</Text>
+                  {tasksInSchedule.map((task) => (
+                    <CareTaskRow
+                      canEdit={canEditCare}
+                      isPending={markCareEventMutation.isPending}
+                      key={task.id}
+                      lastEvent={lastEventByTaskId.get(task.id)}
+                      onDone={handleMarkDone}
+                      task={task}
+                    />
+                  ))}
+                </View>
+              );
+            })}
           </View>
         </Card>
 
         {/* ── Son Hareketler ── */}
         <Card style={styles.card}>
-          <SectionHeader subtitle="Tamamlanan bakım rutinleri." title="Son Bakım Hareketleri" />
+          <SectionHeader subtitle={t('pet.recentCareEventsSubtitle')} title={t('pet.recentCareEvents')} />
           
           <View style={styles.rangeSelector}>
             {(['today', 'week', 'month'] as const).map((range) => {
-              const labelMap = { today: 'Bugün', week: 'Bu Hafta', month: 'Bu Ay' };
+              const labelMap = { today: t('pet.today'), week: t('pet.thisWeek'), month: t('pet.thisMonth') };
               return (
                 <Pressable
                   accessibilityRole="button"
@@ -774,16 +778,16 @@ export default function PetDetailScreen() {
                   <View style={[styles.statIconWrap, { backgroundColor: colors.accentSoft }]}>
                     <Text style={styles.statEmoji}>{careEventEmoji[type]}</Text>
                   </View>
-                  <Text style={styles.statCount}>{count} kez</Text>
+                  <Text style={styles.statCount}>{count} {t('pet.times')}</Text>
                   <Text style={styles.statLabel}>{careEventLabels[type]}</Text>
                 </View>
               ))}
             </ScrollView>
           ) : null}
 
-          {careEventsQuery.isLoading ? <LoadingState label="Hareketler yükleniyor..." /> : null}
+          {careEventsQuery.isLoading ? <LoadingState label={t('pet.loadingEvents')} /> : null}
           {!careEventsQuery.isLoading && filteredEvents.length === 0 ? (
-            <EmptyState icon="🌤️" text="Bu aralıkta henüz bir bakım yapılmadı." title="Sakin bir dönem." />
+            <EmptyState icon="🌤️" text={t('pet.noEventsDesc')} title={t('pet.noEventsTitle')} />
           ) : null}
           <View style={styles.eventList}>
             {filteredEvents.map((event) => (
@@ -793,10 +797,10 @@ export default function PetDetailScreen() {
                 </View>
                 <View style={styles.eventCopy}>
                   <Text style={styles.eventMemberName}>
-                    {event.userName || 'Kullanıcı'}, {careEventLabels[event.eventType]} görevini yaptı.
+                    {t('pet.userDidTask', { userName: event.userName || t('common.user'), taskName: careEventLabels[event.eventType] })}
                   </Text>
                   <Text style={styles.muted}>
-                    {event.taskTitle} · {formatCareEventTime(event.doneAt)}
+                    {['Mama', 'Su', 'Yürüyüş', 'Kum', 'Banyo', 'İlaç', 'Tüy/Tarama', 'Diğer', 'Food', 'Water', 'Walk', 'Litter', 'Bath', 'Medicine', 'Grooming', 'Other'].includes(event.taskTitle) ? t(`careEvent.${event.eventType}`) : event.taskTitle} · {formatCareEventTime(event.doneAt, t)}
                   </Text>
                 </View>
               </View>
@@ -807,7 +811,7 @@ export default function PetDetailScreen() {
         {/* ── Davet Oluştur ── */}
         {isOwner ? (
           <Card style={styles.card}>
-            <SectionHeader subtitle="Ortak bakıcı davet edin. (Maksimum 2 kişi)" title="Bakıcı Davet Et" />
+            <SectionHeader subtitle={t('invite.inviteSubtitle')} title={t('invite.inviteTitle')} />
             <View style={styles.roleSelector}>
               {(['editor', 'viewer'] as const).map((role) => (
                 <Pressable
@@ -817,14 +821,14 @@ export default function PetDetailScreen() {
                   style={[styles.roleOption, inviteRole === role && styles.roleOptionSelected]}
                 >
                   <Text style={[styles.roleOptionText, inviteRole === role && styles.roleOptionTextSelected]}>
-                    {roleLabels[role]}
+                    {t(`roles.${role}`)}
                   </Text>
                 </Pressable>
               ))}
             </View>
             {inviteError ? <Text style={styles.error}>{inviteError}</Text> : null}
             <Button
-              label="Davet Linki Oluştur"
+              label={t('invite.createLink')}
               loading={createInviteMutation.isPending}
               onPress={handleCreateInvite}
               variant="secondary"
@@ -836,12 +840,12 @@ export default function PetDetailScreen() {
                   <View style={styles.ticketHeader}>
                     <Text style={styles.ticketBrand}>🎟️ YUVIOPASS</Text>
                     <Badge 
-                      label={roleLabels[inviteRole]} 
+                      label={t(`roles.${inviteRole}`)} 
                       variant={roleBadgeVariants[inviteRole]} 
                     />
                   </View>
-                  <Text style={styles.ticketTitle}>{pet.name} Ailesine Davetlisin</Text>
-                  <Text style={styles.ticketSubtitle}>Evcil dostumuzun bakım ekibine katıl.</Text>
+                  <Text style={styles.ticketTitle}>{t('invite.ticketTitle', { petName: pet.name })}</Text>
+                  <Text style={styles.ticketSubtitle}>{t('invite.ticketSubtitle')}</Text>
                 </View>
 
                 {/* Ticket Divider Line with notches at sides */}
@@ -853,22 +857,22 @@ export default function PetDetailScreen() {
 
                 {/* Ticket Bottom */}
                 <View style={styles.ticketBottom}>
-                  <Text style={styles.ticketCodeLabel}>DAVET KODU</Text>
+                  <Text style={styles.ticketCodeLabel}>Davet Kodu (Tek Kullanımlık)</Text>
                   <Text style={styles.ticketCode} numberOfLines={1}>
-                    {inviteLink.split('/').pop()}
+                    {inviteLink}
                   </Text>
-                  <Text style={styles.ticketExpiry}>Bu kod 7 gün boyunca geçerlidir.</Text>
+                  <Text style={styles.ticketExpiry}>{t('invite.ticketExpiry')}</Text>
                   
                   <View style={styles.ticketActions}>
                     <Button 
-                      label="Kopyala" 
+                      label={t('common.copy')} 
                       onPress={handleCopyInviteLink} 
                       variant="ghost" 
                       size="sm"
                       style={styles.ticketActionBtn} 
                     />
                     <Button 
-                      label="Paylaş" 
+                      label={t('common.share')} 
                       onPress={handleShareInvite} 
                       variant="primary" 
                       size="sm"
@@ -893,7 +897,7 @@ export default function PetDetailScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ölçüm Ekle</Text>
+              <Text style={styles.modalTitle}>{t('pet.addMeasurement')}</Text>
               <Pressable
                 onPress={() => setIsAddMeasurementOpen(false)}
                 style={({ pressed }) => pressed && styles.pressed}
@@ -908,7 +912,7 @@ export default function PetDetailScreen() {
               ) : null}
 
               <Input
-                label="Kilo (kg) *"
+                label={`${t('pet.weight')} (kg) *`}
                 placeholder="Örn: 4.5"
                 keyboardType="numeric"
                 value={weight}
@@ -916,7 +920,7 @@ export default function PetDetailScreen() {
               />
 
               <Input
-                label="Boy (cm - İsteğe bağlı)"
+                label={`${t('pet.height')} (cm) - ${t('common.optional')}`}
                 placeholder="Örn: 35"
                 keyboardType="numeric"
                 value={height}
@@ -924,7 +928,7 @@ export default function PetDetailScreen() {
               />
 
               <View style={styles.field}>
-                <Text style={styles.label}>Ölçüm Tarihi</Text>
+                <Text style={styles.label}>{t('pet.measurementDate')}</Text>
                 <Pressable
                   onPress={() => setShowMeasurementDatePicker(true)}
                   style={styles.pickerTrigger}
@@ -937,8 +941,8 @@ export default function PetDetailScreen() {
               </View>
 
               <Input
-                label="Notlar (İsteğe bağlı)"
-                placeholder="Örn: Veteriner kontrolünde ölçüldü."
+                label={`${t('pet.notes')} (${t('common.optional')})`}
+                placeholder={t('pet.notesPlaceholder')}
                 value={measurementNotes}
                 onChangeText={setMeasurementNotes}
                 multiline
@@ -947,13 +951,13 @@ export default function PetDetailScreen() {
 
               <View style={styles.modalActions}>
                 <Button
-                  label="Vazgeç"
+                  label={t('common.cancel')}
                   variant="ghost"
                   onPress={() => setIsAddMeasurementOpen(false)}
                   style={{ flex: 1 }}
                 />
                 <Button
-                  label="Kaydet"
+                  label={t('common.save')}
                   loading={createMeasurementMutation.isPending}
                   onPress={handleCreateMeasurement}
                   style={{ flex: 1 }}
@@ -987,12 +991,12 @@ export default function PetDetailScreen() {
             <View style={styles.iosDatePickerOverlay}>
               <View style={styles.iosDatePickerContainer}>
                 <View style={styles.iosDatePickerHeader}>
-                  <Text style={styles.modalTitle}>Tarih Seçin</Text>
+                  <Text style={styles.modalTitle}>{t('expense.selectDate')}</Text>
                   <Pressable
                     onPress={() => setShowMeasurementDatePicker(false)}
                     style={styles.modalDoneBtn}
                   >
-                    <Text style={styles.modalDoneText}>Tamam</Text>
+                    <Text style={styles.modalDoneText}>{t('common.done')}</Text>
                   </Pressable>
                 </View>
                 <DateTimePicker
@@ -1020,7 +1024,7 @@ export default function PetDetailScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Gelişim Geçmişi</Text>
+              <Text style={styles.modalTitle}>{t('pet.growthHistory')}</Text>
               <Pressable
                 onPress={() => setIsHistoryOpen(false)}
                 style={({ pressed }) => pressed && styles.pressed}
@@ -1055,7 +1059,7 @@ export default function PetDetailScreen() {
                               styles.trendBadgeTextSm,
                               wt > 0 ? styles.trendTextUp : wt < 0 ? styles.trendTextDown : styles.trendTextNeutral
                             ]}>
-                              Kilo: {wt > 0 ? `+${wt.toFixed(2)}` : `${wt.toFixed(2)}`} kg
+                              {t('pet.weight')}: {wt > 0 ? `+${wt.toFixed(2)}` : `${wt.toFixed(2)}`} kg
                             </Text>
                           </View>
                         )}
@@ -1068,7 +1072,7 @@ export default function PetDetailScreen() {
                               styles.trendBadgeTextSm,
                               ht > 0 ? styles.trendTextUp : ht < 0 ? styles.trendTextDown : styles.trendTextNeutral
                             ]}>
-                              Boy: {ht > 0 ? `+${ht.toFixed(1)}` : `${ht.toFixed(1)}`} cm
+                              {t('pet.height')}: {ht > 0 ? `+${ht.toFixed(1)}` : `${ht.toFixed(1)}`} cm
                             </Text>
                           </View>
                         )}
@@ -1085,7 +1089,7 @@ export default function PetDetailScreen() {
             
             <View style={{ padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.surfaceBorder }}>
               <Button
-                label="Kapat"
+                label={t('common.close')}
                 variant="secondary"
                 onPress={() => setIsHistoryOpen(false)}
               />
@@ -1283,7 +1287,19 @@ const styles = StyleSheet.create({
 
   // Task List
   taskList: {
+    gap: spacing.lg,
+  },
+  taskGroup: {
     gap: spacing.sm,
+  },
+  taskGroupTitle: {
+    fontSize: typography.micro,
+    fontWeight: fontWeight.bold,
+    color: colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginLeft: spacing.xs,
+    marginBottom: spacing.xs,
   },
 
   // Event List & Timeline

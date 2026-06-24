@@ -1,19 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { Badge } from '../ui/Badge';
 import { colors, fontWeight, radius, shadows, spacing, speciesConfig, typography } from '../../lib/theme';
 import type { Pet, PetRole } from '../../types/app';
 
-const speciesLabels: Record<Pet['species'], string> = {
-  cat: 'Kedi', dog: 'Köpek', bird: 'Kuş', rabbit: 'Tavşan', other: 'Diğer',
-};
-const genderLabels: Record<Pet['gender'], string> = {
-  male: '♂ Erkek', female: '♀ Dişi', unknown: 'Bilinmiyor',
-};
-const roleLabels: Record<PetRole, string> = {
-  owner: 'Sahip', editor: 'Editör', viewer: 'Görüntüleyen',
-};
 const roleBadgeVariants: Record<PetRole, 'roleOwner' | 'roleEditor' | 'roleViewer'> = {
   owner: 'roleOwner', editor: 'roleEditor', viewer: 'roleViewer',
 };
@@ -26,6 +18,7 @@ type PetCardProps = {
 };
 
 export function PetCard({ isSelected = false, onPress, pet, role }: PetCardProps) {
+  const { t } = useTranslation();
   const cfg = speciesConfig[pet.species];
   return (
     <Pressable
@@ -47,16 +40,16 @@ export function PetCard({ isSelected = false, onPress, pet, role }: PetCardProps
           </View>
           <View style={styles.titleBlock}>
             <Text style={styles.name}>{pet.name}</Text>
-            <Text style={styles.species}>{speciesLabels[pet.species]}</Text>
+            <Text style={styles.species}>{t(`species.${pet.species}`)}</Text>
           </View>
-          {role ? <Badge label={roleLabels[role]} variant={roleBadgeVariants[role]} /> : null}
+          {role ? <Badge label={t(`roles.${role}`)} variant={roleBadgeVariants[role]} /> : null}
           <Feather name="chevron-right" size={18} color={colors.textTertiary} />
         </View>
 
         <View style={styles.meta}>
-          <Text style={styles.metaItem}>{genderLabels[pet.gender]}</Text>
+          <Text style={styles.metaItem}>{t(`gender.${pet.gender}`)}</Text>
           {pet.breed ? <Text style={styles.metaItem}>{pet.breed}</Text> : null}
-          {pet.microchipNo ? <Text style={styles.metaItem}>Çip: {pet.microchipNo}</Text> : null}
+          {pet.microchipNo ? <Text style={styles.metaItem}>{t('pet.microchip')}: {pet.microchipNo}</Text> : null}
         </View>
 
         {pet.notes ? (

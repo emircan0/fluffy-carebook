@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../hooks/useAuth';
 import { Input } from '../../components/ui/Input';
@@ -9,6 +10,7 @@ import { Button } from '../../components/ui/Button';
 import { colors, layout, spacing, typography, fontWeight } from '../../lib/theme';
 
 export default function ChangePasswordScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { changePassword } = useAuth();
   
@@ -20,15 +22,15 @@ export default function ChangePasswordScreen() {
 
   const handleSave = async () => {
     if (!currentPassword) {
-      setErrorMsg('Mevcut şifrenizi girmelisiniz.');
+      setErrorMsg(t('settings.emptyCurrentPassword'));
       return;
     }
     if (newPassword.length < 6) {
-      setErrorMsg('Yeni şifre en az 6 karakter olmalıdır.');
+      setErrorMsg(t('settings.passwordLengthError'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setErrorMsg('Yeni şifreler eşleşmiyor.');
+      setErrorMsg(t('settings.passwordMatchError'));
       return;
     }
 
@@ -37,11 +39,11 @@ export default function ChangePasswordScreen() {
 
     try {
       await changePassword(currentPassword, newPassword);
-      Alert.alert('Başarılı', 'Şifreniz başarıyla güncellendi.', [
-        { text: 'Tamam', onPress: () => router.back() }
+      Alert.alert(t('settings.success'), t('settings.passwordUpdateSuccess'), [
+        { text: t('settings.ok'), onPress: () => router.back() }
       ]);
     } catch (error: any) {
-      setErrorMsg(error.message || 'Şifre güncellenirken bir hata oluştu. Mevcut şifrenizi doğru girdiğinizden emin olun.');
+      setErrorMsg(error.message || t('settings.passwordUpdateError'));
     } finally {
       setIsSaving(false);
     }
@@ -53,7 +55,7 @@ export default function ChangePasswordScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>Şifre Değiştir</Text>
+        <Text style={styles.topBarTitle}>{t('settings.changePasswordTitle')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
@@ -63,13 +65,13 @@ export default function ChangePasswordScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <Text style={styles.description}>
-            Hesabınızın güvenliği için mevcut şifrenizi girerek yeni bir şifre belirleyebilirsiniz.
+            {t('settings.changePasswordDesc')}
           </Text>
 
           <View style={styles.form}>
             <Input
-              label="Mevcut Şifre"
-              placeholder="Mevcut şifrenizi girin"
+              label={t('settings.currentPassword')}
+              placeholder={t('settings.currentPasswordPlaceholder')}
               value={currentPassword}
               onChangeText={setCurrentPassword}
               secureTextEntry
@@ -78,8 +80,8 @@ export default function ChangePasswordScreen() {
             />
 
             <Input
-              label="Yeni Şifre"
-              placeholder="Yeni şifrenizi girin"
+              label={t('settings.newPassword')}
+              placeholder={t('settings.newPasswordPlaceholder')}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry
@@ -88,8 +90,8 @@ export default function ChangePasswordScreen() {
             />
 
             <Input
-              label="Yeni Şifre (Tekrar)"
-              placeholder="Yeni şifrenizi tekrar girin"
+              label={t('settings.newPasswordConfirm')}
+              placeholder={t('settings.newPasswordConfirmPlaceholder')}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -103,7 +105,7 @@ export default function ChangePasswordScreen() {
           ) : null}
 
           <Button
-            label="Şifreyi Güncelle"
+            label={t('settings.updatePasswordBtn')}
             onPress={handleSave}
             loading={isSaving}
             disabled={!currentPassword || !newPassword || !confirmPassword || isSaving}

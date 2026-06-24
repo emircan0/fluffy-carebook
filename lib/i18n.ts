@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as Localization from 'expo-localization';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from '../locales/en.json';
 import tr from '../locales/tr.json';
@@ -10,20 +11,47 @@ const resources = {
   tr: { translation: tr },
 };
 
-const getLocales = () => Localization.getLocales();
-const deviceLanguage = getLocales()[0]?.languageCode ?? 'en';
-// Use Turkish if the device language is Turkish, otherwise fallback to English.
-const defaultLanguage = deviceLanguage === 'tr' ? 'tr' : 'en';
+const LANGUAGE_KEY = 'app_language';
+
+const languageDetector: any = {
+  type: 'languageDetector',
+  async: true,
+  detect: async (callback: (lng: string) => void) => {
+    try {
+      const storedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
+      if (storedLanguage) {
+        return callback(storedLanguage);
+      }
+      
+      // Right now it should open directly in English
+      return callback('en');
+    } catch (e) {
+      return callback('en');
+    }
+  },
+  init: () => {},
+  cacheUserLanguage: async (lng: string) => {
+    try {
+      await AsyncStorage.setItem(LANGUAGE_KEY, lng);
+    } catch (e) {}
+  },
+};
 
 i18n
+  .use(languageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    lng: defaultLanguage,
     fallbackLng: 'en',
+    compatibilityJSON: 'v4',
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
   });
+
+export const changeLanguage = async (lng: string) => {
+  await i18n.changeLanguage(lng);
+  await AsyncStorage.setItem(LANGUAGE_KEY, lng);
+};
 
 export default i18n;

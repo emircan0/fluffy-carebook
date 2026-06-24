@@ -76,8 +76,55 @@ Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:
 4. Kullanıcı Hakları (KVKK md. 11 ve GDPR)
 Verilerinizi güncelleme, düzeltme veya tamamen silme hakkına sahipsiniz. Profilinizde yer alan "Hesabı Sil" butonunu kullanarak verilerinizi anında pasife alabilirsiniz. Verilerin tamamen kaldırılması talebi için emircanmertt@gmail.com adresi üzerinden iletişime geçebilirsiniz.`;
 
+const termsTextEn = `YuvioPet - Terms of Service
+Last Updated: June 22, 2026
+
+By downloading, installing, or using the YuvioPet mobile application ("App"), you completely and unconditionally accept these Terms of Service. If you do not accept the terms, please do not use the App.
+
+1. Description of Service and Purpose
+YuvioPet is a personal tracking application that allows pet owners and caregivers to collaboratively track their pets' daily feeding, medication, cleaning, and walking routines, as well as record growth data (weight/height). The App is non-commercial and in no way constitutes veterinary or medical advice.
+
+2. Account Security and User Responsibility
+- Firebase Authentication infrastructure is used to log into the application. You are solely responsible for maintaining the confidentiality of your account password and login information.
+- You are directly responsible for all activities that occur under your account.
+- Sharing illegal, insulting, copyright-infringing, or otherwise disturbing content (notes, names, etc.) within the App is prohibited.
+
+3. Not Veterinary Advice
+The data entered or calculated in the application (such as weight growth charts, age displays, medication schedules) is for informational purposes only. You must always consult a professional veterinarian for any diagnosis, treatment, or medical decisions regarding your pet's health.
+
+4. Limitation of Liability and Warranty Disclaimer
+The App is provided "as is" and "as available". YuvioPet cannot be held liable for any direct or indirect damages that may arise from data loss, deletion, cloud server interruptions, technical glitches within the application, or notification delays.
+
+5. Modifications and Termination
+YuvioPet reserves the right to update these Terms of Service at any time. Changes become effective as soon as they are published within the App or on this web address.`;
+
+const privacyTextEn = `YuvioPet - Privacy Policy
+Last Updated: June 22, 2026
+
+At YuvioPet ("App"), we attach great importance to your privacy and the protection of your personal data. This Privacy Policy has been prepared in compliance with the Personal Data Protection Law No. 6698 ("KVKK") and the General Data Protection Regulation ("GDPR").
+
+1. Collected Personal Data
+While using the App, the following data is collected and processed:
+- User Membership Information: Email address, full name, and Firebase UID.
+- Pet Data: Pet's name, species, breed, birth date, gender, microchip number, special health notes, and entered height/weight measurement records.
+- Device and Notification Information: Expo Push Token value for push notifications and device platform (iOS/Android).
+
+2. Data Processing Purposes
+Your personal data is processed for the following purposes:
+- Providing App services (reminders, routines, growth tracking, etc.),
+- Synchronizing data among your co-caregiving team,
+- Delivering medication, vaccination, and veterinary appointment notifications.
+
+3. Data Storage and Sharing with Third Parties
+- Your data is stored on Firebase Firestore and Firebase Authentication servers within the Google Cloud Platform at the highest security standards.
+- YuvioPet will never sell your personal data to third parties or share it for marketing purposes.
+- Pet data can only be viewed by other YuvioPet users whom you authorize by sending an invitation link.
+
+4. User Rights (KVKK Art. 11 and GDPR)
+You have the right to update, correct, or completely delete your data. You can instantly deactivate your data by using the "Delete Account" button in your profile. For requests to completely remove data, you can contact us at emircanmertt@gmail.com.`;
+
 export default function ProfileScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { authError, isAuthLoading, profile, signOut, user } = useAuth();
   const petsQuery = usePets();
@@ -116,9 +163,17 @@ export default function ProfileScreen() {
       tint: colors.roleOwner,
     },
     {
+      id: 'language',
+      icon: 'globe',
+      label: t('profile.changeLanguage'),
+      description: t('profile.changeLanguageDesc'),
+      route: '/settings/language',
+      tint: colors.info,
+    },
+    {
       id: 'notifications',
       icon: 'bell',
-      label: 'Bildirim Tercihleri',
+      label: t('profile.manageNotifications'),
       description: t('profile.manageNotificationsDesc'),
       route: '/settings/notifications',
       tint: colors.accent,
@@ -228,7 +283,7 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNum}>{pets.length}</Text>
-            <Text style={styles.statLabel}>Aktif Pet</Text>
+            <Text style={styles.statLabel}>{t('profile.activePet')}</Text>
           </View>
           <View style={[styles.statCard, styles.statCardMiddle]}>
             <Text style={styles.statNum}>
@@ -238,7 +293,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNum}>—</Text>
-            <Text style={styles.statLabel}>Streak</Text>
+            <Text style={styles.statLabel}>{t('profile.streak')}</Text>
           </View>
         </View>
 
@@ -252,14 +307,14 @@ export default function ProfileScreen() {
 
         {/* ── Documents & Info ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bilgi & Belgeler</Text>
+          <Text style={styles.sectionTitle}>{t('profile.infoAndDocs')}</Text>
           {renderSettingsGroup(docSettings)}
         </View>
 
         {/* ── Danger Zone ── */}
         {!isGuest && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.danger }]}>Tehlikeli Alan</Text>
+            <Text style={[styles.sectionTitle, { color: colors.danger }]}>{t('profile.dangerZone')}</Text>
             {renderSettingsGroup(dangerSettings)}
           </View>
         )}
@@ -267,14 +322,14 @@ export default function ProfileScreen() {
         {/* ── Sign Out ── */}
         <View style={styles.signOutWrapper}>
           <Button
-            label="Oturumu Kapat"
+            label={t('profile.signOut')}
             onPress={signOut}
             variant="secondary"
             size="md"
           />
         </View>
 
-        {authError ? (
+        {authError && !isGuest ? (
           <Text style={styles.accountMessage}>{authError}</Text>
         ) : null}
 
@@ -304,7 +359,9 @@ export default function ProfileScreen() {
 
             <ScrollView contentContainerStyle={styles.docScrollContent}>
               <Text style={styles.docText}>
-                {selectedDoc === 'terms' ? termsText : privacyText}
+                {selectedDoc === 'terms' 
+                  ? (i18n.language === 'en' ? termsTextEn : termsText) 
+                  : (i18n.language === 'en' ? privacyTextEn : privacyText)}
               </Text>
               
               <View style={styles.webUrlContainer}>
@@ -427,6 +484,8 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    textAlign: 'center',
+    paddingHorizontal: 4,
   },
 
   // Sections

@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { Platform } from 'react-native';
 
+import i18n from './i18n';
 import { firebaseConfigError } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
 import type { NotificationPreferences, NotificationTokenPlatform } from '../types/app';
@@ -15,11 +16,11 @@ export type PushRegistrationResult = {
 };
 
 export const pushMessages = {
-  missingAuth: 'Bildirimleri açmak için giriş yapmalısınız.',
-  unsupportedWeb: 'Web tarafında push desteği bu sprintte aktif değil. Mobil cihazda deneyin.',
-  denied: 'Bildirim izni verilmedi. Cihaz ayarlarından daha sonra açabilirsiniz.',
-  registered: 'Bildirimler açık. Hatırlatmaları kaçırmayacaksın.',
-  tokenFailed: 'Push token alınamadı. Mobil cihazda veya development build üzerinde tekrar deneyin.',
+  get missingAuth() { return i18n.t('notifications.missingAuth'); },
+  get unsupportedWeb() { return i18n.t('notifications.unsupportedWeb'); },
+  get denied() { return i18n.t('notifications.denied'); },
+  get registered() { return i18n.t('notifications.registered'); },
+  get tokenFailed() { return i18n.t('notifications.tokenFailed'); },
 };
 
 const REMINDER_CHANNEL_ID = 'reminders';
@@ -89,7 +90,7 @@ async function ensureAndroidChannel() {
   }
 
   await Notifications.setNotificationChannelAsync(REMINDER_CHANNEL_ID, {
-    name: 'Hatırlatıcılar',
+    name: i18n.t('notifications.channelName'),
     importance: Notifications.AndroidImportance.DEFAULT,
   });
 }

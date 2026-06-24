@@ -48,7 +48,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
 
   const roleLabels: Record<string, string> = {
-    owner: 'Owner',
+    owner: t('roles.owner'),
     editor: t('roles.editor'),
     viewer: t('roles.viewer'),
   };
@@ -323,7 +323,7 @@ export default function HomeScreen() {
               text={t("index.addFirstPetDesc")}
               action={
                 <Button
-                  label="Kuruluma git"
+                  label={t("index.goToSetup")}
                   onPress={() => router.push('/onboarding')}
                   size="sm"
                 />
@@ -334,6 +334,7 @@ export default function HomeScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.petScrollerContainer}
             contentContainerStyle={styles.petScroller}
           >
             {pets.map((pet) => {
@@ -350,16 +351,18 @@ export default function HomeScreen() {
                     pressed && styles.petChipPressed,
                   ]}
                 >
-                  <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '20' }]}>
-                    <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
-                      {pet.name}
-                    </Text>
-                    <Text style={styles.petChipSpecies}>
-                      {t(`species.${pet.species}`)}
-                    </Text>
+                  <View style={styles.petChipContent}>
+                    <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '20' }]}>
+                      <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center' }}>
+                      <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
+                        {pet.name}
+                      </Text>
+                      <Text style={styles.petChipSpecies}>
+                        {t(`species.${pet.species}`)}
+                      </Text>
+                    </View>
                   </View>
                 </Pressable>
               );
@@ -523,23 +526,29 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
+  petScrollerContainer: {
+    height: 104,
+  },
   petChip: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'center',
     backgroundColor: colors.surface,
-    borderRadius: radius.pill,
+    borderRadius: 48,
     borderWidth: 1,
     borderColor: colors.surfaceBorder,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minWidth: 112,
+    width: 96,
+    height: 96,
     ...shadows.sm,
   },
   petChipSelected: {
     borderColor: colors.accent,
     backgroundColor: colors.accentSofter,
     ...shadows.accent,
+  },
+  petChipContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
   },
   petChipPressed: {
     opacity: 0.75,

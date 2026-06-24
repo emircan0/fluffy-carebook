@@ -19,6 +19,9 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../hooks/useAuth';
 import { firebaseConfigError } from '../../lib/auth';
+import { changeLanguage } from '../../lib/i18n';
+import { acceptInvite } from '../../lib/invites';
+import { useAuthStore } from '../../store/authStore';
 import { colors, fontWeight, layout, radius, shadows, spacing, typography } from '../../lib/theme';
 
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
@@ -36,7 +39,7 @@ if (googleWebClientId || googleIosClientId) {
 }
 
 export default function LoginScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const {
     authError,
@@ -53,19 +56,35 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
 
   const isRegister = mode === 'register';
   const buttonLabel = isRegister ? t('auth.createAccount') : t('auth.login');
+  
+  const normalizedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
+  const isInviteCodeValid = normalizedInviteCode.length === 0 || normalizedInviteCode.length === 6;
+
   const canSubmit = useMemo(() => {
     if (!email.trim() || password.length < 6) return false;
-    return isRegister ? Boolean(fullName.trim()) && acceptedTerms : true;
-  }, [email, fullName, isRegister, password, acceptedTerms]);
+    return isRegister ? Boolean(fullName.trim()) && acceptedTerms && isInviteCodeValid : true;
+  }, [email, fullName, isRegister, password, acceptedTerms, isInviteCodeValid]);
   const configMissing = authError === firebaseConfigError;
 
   async function handleSubmit() {
     if (!canSubmit || isAuthLoading) return;
     if (isRegister) {
       await register(email, password, fullName);
+      const authErrorState = useAuthStore.getState().authError;
+      const userState = useAuthStore.getState().user;
+      const profileState = useAuthStore.getState().profile;
+      
+      if (!authErrorState && userState && normalizedInviteCode.length === 6) {
+        try {
+          await acceptInvite(userState.uid, profileState, normalizedInviteCode);
+        } catch (error: any) {
+          alert('Hesabınız oluşturuldu ancak davet kodu geçersiz veya süresi dolmuş. Pets ekranından tekrar deneyebilirsiniz.');
+        }
+      }
       return;
     }
     await signIn(email, password);
@@ -137,8 +156,26 @@ export default function LoginScreen() {
       >
         <View style={styles.container}>
           <View style={styles.brand}>
-            <View style={styles.logoBox}>
-              <Text style={styles.logoEmoji}>🐾</Text>
+            <View style={styles.brandHeaderRow}>
+              <View style={styles.logoBox}>
+                <Text style={styles.logoEmoji}>🐾</Text>
+              </View>
+
+              <View style={styles.langSelector}>
+                <Pressable
+                  onPress={() => changeLanguage('tr')}
+                  style={[styles.langOption, i18n.language.startsWith('tr') && styles.langOptionActive]}
+                >
+                  <Text style={[styles.langOptionText, i18n.language.startsWith('tr') && styles.langOptionTextActive]}>TR</Text>
+                </Pressable>
+                <View style={styles.langDivider} />
+                <Pressable
+                  onPress={() => changeLanguage('en')}
+                  style={[styles.langOption, i18n.language.startsWith('en') && styles.langOptionActive]}
+                >
+                  <Text style={[styles.langOptionText, i18n.language.startsWith('en') && styles.langOptionTextActive]}>EN</Text>
+                </Pressable>
+              </View>
             </View>
             <Text style={styles.wordmark}>YuvioPet</Text>
             <Text style={styles.hero}>{t('auth.welcome')}</Text>
@@ -192,6 +229,18 @@ export default function LoginScreen() {
                 hint={isRegister ? t('auth.passwordHint') : undefined}
               />
 
+              {isRegister ? (
+                <Input
+                  autoCapitalize="characters"
+                  editable={!isAuthLoading}
+                  label="Davet Kodu (İsteğe Bağlı)"
+                  onChangeText={setInviteCode}
+                  placeholder="Örn: A7X9K2"
+                  value={inviteCode}
+                  maxLength={6}
+                />
+              ) : null}
+
               {isRegister && (
                 <Pressable 
                   style={styles.checkboxContainer} 
@@ -201,20 +250,21 @@ export default function LoginScreen() {
                     {acceptedTerms && <Feather name="check" size={14} color="#fff" />}
                   </View>
                   <Text style={styles.checkboxLabel}>
+                    {t('auth.termsPrefix')}
                     <Text 
                       style={styles.linkText} 
                       onPress={() => Linking.openURL('https://petapp-54886.web.app/terms')}
                     >
-                      Kullanım Koşulları
+                      {t('auth.terms')}
                     </Text>
-                    {' ve '}
+                    {t('auth.and')}
                     <Text 
                       style={styles.linkText} 
                       onPress={() => Linking.openURL('https://petapp-54886.web.app/privacy')}
                     >
-                      Gizlilik Politikası
+                      {t('auth.privacy')}
                     </Text>
-                    'nı okudum, kabul ediyorum.
+                    {t('auth.termsSuffix')}
                   </Text>
                 </Pressable>
               )}
@@ -255,13 +305,19 @@ export default function LoginScreen() {
           {/* Social Sign-in Methods (Apple & Google) */}
           <View style={styles.socialButtonsContainer}>
             {Platform.OS === 'ios' && (
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                cornerRadius={radius.pill}
-                style={styles.appleButton}
+              <Pressable
+                accessibilityRole="button"
+                disabled={isAuthLoading || configMissing}
                 onPress={handleAppleSignIn}
-              />
+                style={({ pressed }) => [
+                  styles.socialButton,
+                  styles.appleButton,
+                  pressed && styles.socialButtonPressed,
+                ]}
+              >
+                <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
+                <Text style={styles.appleButtonText}>{t('auth.continueWithApple')}</Text>
+              </Pressable>
             )}
 
             <Pressable
@@ -332,6 +388,46 @@ const styles = StyleSheet.create({
   // Brand
   brand: {
     gap: spacing.md,
+  },
+  brandHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  langSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceRaised,
+    borderColor: colors.surfaceBorder,
+    borderWidth: 1,
+    borderRadius: radius.pill,
+    paddingHorizontal: 4,
+    height: 32,
+  },
+  langOption: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 28,
+  },
+  langOptionActive: {
+    backgroundColor: colors.accent,
+  },
+  langOptionText: {
+    fontSize: typography.micro,
+    color: colors.textSecondary,
+    fontWeight: fontWeight.bold,
+  },
+  langOptionTextActive: {
+    color: colors.textInverse,
+  },
+  langDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: colors.surfaceBorder,
   },
   logoBox: {
     width: 64,
@@ -480,8 +576,14 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
   },
   appleButton: {
-    width: '100%',
-    height: 50,
+    backgroundColor: '#000000',
+    borderColor: '#000000',
+    ...shadows.sm,
+  },
+  appleButtonText: {
+    color: '#FFFFFF',
+    fontWeight: fontWeight.bold,
+    fontSize: typography.body,
   },
   footerContainer: {
     gap: spacing.sm,

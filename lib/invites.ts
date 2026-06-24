@@ -38,22 +38,19 @@ function requireFirestore() {
   return firestore;
 }
 
-function generateInviteToken() {
-  const cryptoApi = globalThis.crypto;
-
-  if (cryptoApi?.getRandomValues) {
-    const bytes = new Uint8Array(18);
-    cryptoApi.getRandomValues(bytes);
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+async function generateUniqueInviteToken(db: any): Promise<string> {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  while (true) {
+    let token = '';
+    for (let i = 0; i < 6; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const docRef = doc(db, 'invites', token);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return token;
+    }
   }
-
-  // Fallback for React Native / Expo Go where globalThis.crypto is not available
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  for (let i = 0; i < 36; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
 }
 
 function parseInvite(id: string, data: Record<string, unknown>): PetInvite {
@@ -110,7 +107,7 @@ export async function createInvite(
   }
 
   const db = requireFirestore();
-  const token = generateInviteToken();
+  const token = await generateUniqueInviteToken(db);
   const inviteRef = doc(db, 'invites', token);
   const petRef = doc(db, 'pets', input.petId);
   const memberRef = doc(db, 'pets', input.petId, 'members', userId);
@@ -190,17 +187,8 @@ export async function acceptInvite(userId: string, profile: UserProfile | null, 
     }
 
     const memberRef = doc(db, 'pets', invite.petId, 'members', userId);
-    const activeMembersQuery = query(
-      collection(db, 'pets', invite.petId, 'members'),
-      where('status', '==', 'active'),
-    );
-    const activeMembersSnapshot = await getDocs(activeMembersQuery);
     const memberSnapshot = await transaction.get(memberRef);
     const alreadyActive = memberSnapshot.exists() && memberSnapshot.data().status === 'active';
-
-    if (!alreadyActive && activeMembersSnapshot.size >= 2) {
-      throw new Error(inviteMessages.memberLimit);
-    }
 
     if (!alreadyActive) {
       transaction.set(memberRef, {

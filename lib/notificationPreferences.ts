@@ -1,3 +1,4 @@
+import i18n from './i18n';
 import type { NotificationPreferences, ReminderType } from '../types/app';
 
 export const notificationPreferenceKeys: ReminderType[] = [
@@ -18,35 +19,44 @@ export const defaultNotificationPreferences: NotificationPreferences = {
   other: false,
 };
 
-export const notificationPreferenceLabels: Record<ReminderType, {
-  label: string;
-  description: string;
-}> = {
-  vaccine: {
-    label: 'Aşı',
-    description: 'Aşı günlerini kaçırma.',
+export const notificationPreferenceLabels = {
+  get vaccine() {
+    return {
+      label: i18n.t('reminders.types.vaccine'),
+      description: i18n.t('preferences.vaccineDesc'),
+    };
   },
-  internal_parasite: {
-    label: 'İç parazit',
-    description: 'Düzenli parazit takibini hatırla.',
+  get internal_parasite() {
+    return {
+      label: i18n.t('reminders.types.internal_parasite'),
+      description: i18n.t('preferences.internalParasiteDesc'),
+    };
   },
-  external_parasite: {
-    label: 'Dış parazit',
-    description: 'Dış parazit uygulamalarını takip et.',
+  get external_parasite() {
+    return {
+      label: i18n.t('reminders.types.external_parasite'),
+      description: i18n.t('preferences.externalParasiteDesc'),
+    };
   },
-  medicine: {
-    label: 'İlaç',
-    description: 'İlaç saatlerini unutma.',
+  get medicine() {
+    return {
+      label: i18n.t('reminders.types.medicine'),
+      description: i18n.t('preferences.medicineDesc'),
+    };
   },
-  vet: {
-    label: 'Veteriner',
-    description: 'Randevu ve kontrol günleri.',
+  get vet() {
+    return {
+      label: i18n.t('reminders.types.vet'),
+      description: i18n.t('preferences.vetDesc'),
+    };
   },
-  other: {
-    label: 'Diğer',
-    description: 'Diğer hatırlatmalar için bildirim al.',
+  get other() {
+    return {
+      label: i18n.t('reminders.types.other'),
+      description: i18n.t('preferences.otherDesc'),
+    };
   },
-};
+} as Record<ReminderType, { label: string; description: string }>;
 
 export function normalizeNotificationPreferences(value: unknown): NotificationPreferences {
   if (!value || typeof value !== 'object') {

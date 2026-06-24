@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { careEventLabels, careScheduleLabels } from '../../lib/care';
 import { careEventColors, careEventEmoji, colors, fontWeight, radius, shadows, spacing, typography } from '../../lib/theme';
@@ -15,7 +16,7 @@ type CareTaskRowProps = {
   onDone: (task: CareTask) => void;
 };
 
-export function formatCareEventTime(value: unknown) {
+export function formatCareEventTime(value: unknown, t: any) {
   const date =
     value && typeof value === 'object' && 'toDate' in value
       ? (value as { toDate: () => Date }).toDate()
@@ -37,9 +38,9 @@ export function formatCareEventTime(value: unknown) {
     date.getMonth() === yesterday.getMonth() &&
     date.getDate() === yesterday.getDate();
 
-  if (sameDay) return `Bugün ${time}`;
-  if (isYesterday) return `Dün ${time}`;
-  return `${date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })} ${time}`;
+  if (sameDay) return `${t('care.todayWord')} ${time}`;
+  if (isYesterday) return `${t('care.yesterdayWord')} ${time}`;
+  return `${date.toLocaleDateString(t('care.locale') || 'en-US', { day: '2-digit', month: 'short' })} ${time}`;
 }
 
 export function CareTaskRow({
@@ -50,9 +51,18 @@ export function CareTaskRow({
   onDone,
   task,
 }: CareTaskRowProps) {
-  const lastDoneAt = formatCareEventTime(lastEvent?.doneAt);
+  const { t } = useTranslation();
+  const lastDoneAt = formatCareEventTime(lastEvent?.doneAt, t);
   const doneDisabled = isPending || (!task.allowMultiplePerDay && isDone);
   const tint = careEventColors[task.eventType];
+
+  const defaultTitles = [
+    'Mama', 'Su', 'Yürüyüş', 'Kum', 'Banyo', 'İlaç', 'Tüy/Tarama', 'Diğer',
+    'Oyun', 'Eğitim', 'Diş',
+    'Food', 'Water', 'Walk', 'Litter', 'Bath', 'Medicine', 'Grooming', 'Other',
+    'Play', 'Training', 'Teeth'
+  ];
+  const displayTitle = defaultTitles.includes(task.title) ? t(`careEvent.${task.eventType}`) : task.title;
 
   return (
     <Pressable
@@ -70,18 +80,18 @@ export function CareTaskRow({
 
       <View style={styles.body}>
         <Text style={[styles.title, isDone && styles.titleDone]} numberOfLines={1}>
-          {task.title}
+          {displayTitle}
         </Text>
         <Text style={styles.meta}>
           {task.dueTime ? `${task.dueTime} · ` : ''}
-          {careScheduleLabels[task.scheduleType]}
+          {t(`careSchedule.${task.scheduleType}`)}
         </Text>
         {lastEvent ? (
           <Text style={styles.metaSoft}>
-            {lastEvent.userName || 'Kullanıcı'} · {lastDoneAt || careEventLabels[task.eventType]}
+            {lastEvent.userName || t('care.user')} · {lastDoneAt || t(`careEvent.${task.eventType}`)}
           </Text>
         ) : (
-          <Text style={styles.metaSoft}>{careEventLabels[task.eventType]}</Text>
+          <Text style={styles.metaSoft}>{t(`careEvent.${task.eventType}`)}</Text>
         )}
       </View>
 

@@ -16,10 +16,11 @@ import { useCreateReminder } from '../../lib/mutations/useCreateReminder';
 import { useDeleteReminder } from '../../lib/mutations/useDeleteReminder';
 import { useUpdateReminder } from '../../lib/mutations/useUpdateReminder';
 import { useToggleReminderComplete } from '../../lib/mutations/useToggleReminderComplete';
-import { getPetErrorMessage } from '../../lib/pets';
+import { getPetErrorMessage, getCurrentUserMember } from '../../lib/pets';
 import { usePet } from '../../lib/queries/usePet';
 import { usePets } from '../../lib/queries/usePets';
-import { useReminders } from '../../lib/queries/useReminders';
+import { useQuery } from '@tanstack/react-query';
+import { hasFirebaseConfig } from '../../lib/firebase';
 import { usePetRealtime } from '../../lib/realtime/usePetRealtime';
 import {
   formatReminderDateInput,
@@ -29,6 +30,7 @@ import {
   reminderTypeIcons,
   reminderTypeLabels,
   toReminderDate,
+  listReminders,
 } from '../../lib/reminders';
 import {
   colors,
@@ -41,7 +43,7 @@ import {
   typography,
 } from '../../lib/theme';
 import { useAppStore } from '../../store/appStore';
-import type { Reminder, ReminderRecurrence, ReminderType } from '../../types/app';
+import type { Reminder, ReminderRecurrence, ReminderType, PetRole } from '../../types/app';
 
 const reminderTypeOptions: Array<{ label: string; value: ReminderType }> = [
   { label: 'Aşı', value: 'vaccine' },
@@ -95,19 +97,56 @@ export default function RemindersScreen() {
   ];
 
   const queryClient = useQueryClient();
-  const selectedPetId = useAppStore((s) => s.selectedPetId);
-  const setSelectedPetId = useAppStore((s) => s.setSelectedPetId);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const { user } = useAuth();
   const petsQuery = usePets();
   const pets = useMemo(() => petsQuery.data ?? [], [petsQuery.data]);
-  const selectedPet = pets.find((pet) => pet.id === selectedPetId) ?? null;
+  const selectedPet = selectedPetId ? pets.find((pet) => pet.id === selectedPetId) ?? null : null;
   const activePetId = selectedPet?.id;
   const petQuery = usePet(activePetId);
-  const remindersQuery = useReminders(activePetId);
+
+  const remindersQuery = useQuery({
+    queryKey: ['reminders', selectedPetId ? selectedPetId : 'all_pets'],
+    queryFn: async () => {
+      if (selectedPetId) {
+        return listReminders(selectedPetId);
+      }
+      if (pets.length === 0) return [];
+      const allReminders = await Promise.all(
+        pets.map((p) => listReminders(p.id))
+      );
+      return allReminders.flat();
+    },
+    enabled: (selectedPetId !== null || pets.length > 0) && hasFirebaseConfig,
+  });
+
+  const petsRolesQuery = useQuery({
+    queryKey: ['pets_roles', pets.map((p) => p.id).join(','), user?.uid],
+    queryFn: async () => {
+      if (!user?.uid || pets.length === 0) return {};
+      const roles: Record<string, PetRole> = {};
+      await Promise.all(
+        pets.map(async (pet) => {
+          const member = await getCurrentUserMember(pet.id, user.uid);
+          if (member) {
+            roles[pet.id] = member.role;
+          }
+        })
+      );
+      return roles;
+    },
+    enabled: pets.length > 0 && Boolean(user?.uid) && hasFirebaseConfig,
+  });
+
   const createReminderMutation = useCreateReminder();
   const updateReminderMutation = useUpdateReminder();
   const deleteReminderMutation = useDeleteReminder();
   const toggleReminderCompleteMutation = useToggleReminderComplete();
+
+  const getCanEditReminder = (reminder: Reminder) => {
+    const role = petsRolesQuery.data?.[reminder.petId] ?? null;
+    return role === 'owner' || role === 'editor';
+  };
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
@@ -131,9 +170,11 @@ export default function RemindersScreen() {
   const isSaving = createReminderMutation.isPending || updateReminderMutation.isPending;
 
   const invalidateReminders = useCallback(() => {
-    if (!activePetId) return;
-    void queryClient.invalidateQueries({ queryKey: ['reminders', activePetId] });
-    void queryClient.invalidateQueries({ queryKey: ['todayDashboard', activePetId] });
+    if (activePetId) {
+      void queryClient.invalidateQueries({ queryKey: ['reminders', activePetId] });
+      void queryClient.invalidateQueries({ queryKey: ['todayDashboard', activePetId] });
+    }
+    void queryClient.invalidateQueries({ queryKey: ['reminders', 'all_pets'] });
   }, [activePetId, queryClient]);
 
   const realtime = usePetRealtime({
@@ -147,15 +188,10 @@ export default function RemindersScreen() {
   });
 
   useEffect(() => {
-    if (pets.length === 0) {
-      if (selectedPetId) setSelectedPetId(null);
-      return;
+    if (selectedPetId && !pets.some((pet) => pet.id === selectedPetId)) {
+      setSelectedPetId(null);
     }
-
-    if (!selectedPetId || !pets.some((pet) => pet.id === selectedPetId)) {
-      setSelectedPetId(pets[0].id);
-    }
-  }, [pets, selectedPetId, setSelectedPetId]);
+  }, [pets, selectedPetId]);
 
   function resetForm() {
     setEditingReminder(null);
@@ -175,6 +211,7 @@ export default function RemindersScreen() {
   }
 
   function openEditForm(reminder: Reminder) {
+    setSelectedPetId(reminder.petId); // Switch to that pet's view for editing
     setEditingReminder(reminder);
     setTitle(reminder.title);
     setReminderType(reminder.reminderType);
@@ -216,25 +253,39 @@ export default function RemindersScreen() {
 
     try {
       if (editingReminder) {
-        await updateReminderMutation.mutateAsync({
-          petId: activePetId,
-          reminderId: editingReminder.id,
-          title,
-          reminderType,
-          remindAt: finalDate,
-          recurrence,
-          notifyEnabled: notifyState === 'enabled',
-          isActive: activeState === 'active',
-        });
+        await updateReminderMutation.mutateAsync(
+          {
+            petId: activePetId,
+            reminderId: editingReminder.id,
+            title,
+            reminderType,
+            remindAt: finalDate,
+            recurrence,
+            notifyEnabled: notifyState === 'enabled',
+            isActive: activeState === 'active',
+          },
+          {
+            onSuccess: () => {
+              void queryClient.invalidateQueries({ queryKey: ['reminders', 'all_pets'] });
+            },
+          }
+        );
       } else {
-        await createReminderMutation.mutateAsync({
-          petId: activePetId,
-          title,
-          reminderType,
-          remindAt: finalDate,
-          recurrence,
-          notifyEnabled: notifyState === 'enabled',
-        });
+        await createReminderMutation.mutateAsync(
+          {
+            petId: activePetId,
+            title,
+            reminderType,
+            remindAt: finalDate,
+            recurrence,
+            notifyEnabled: notifyState === 'enabled',
+          },
+          {
+            onSuccess: () => {
+              void queryClient.invalidateQueries({ queryKey: ['reminders', 'all_pets'] });
+            },
+          }
+        );
       }
 
       closeForm();
@@ -244,17 +295,25 @@ export default function RemindersScreen() {
   }
 
   async function handleDelete(reminder: Reminder) {
-    if (!activePetId || !canEdit || deleteReminderMutation.isPending) {
+    const reminderCanEdit = getCanEditReminder(reminder);
+    if (!reminder.petId || !reminderCanEdit || deleteReminderMutation.isPending) {
       return;
     }
 
     setFormError(null);
 
     try {
-      await deleteReminderMutation.mutateAsync({
-        petId: activePetId,
-        reminderId: reminder.id,
-      });
+      await deleteReminderMutation.mutateAsync(
+        {
+          petId: reminder.petId,
+          reminderId: reminder.id,
+        },
+        {
+          onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['reminders', 'all_pets'] });
+          },
+        }
+      );
 
       if (editingReminder?.id === reminder.id) {
         closeForm();
@@ -265,18 +324,26 @@ export default function RemindersScreen() {
   }
 
   async function handleToggleComplete(reminder: Reminder) {
-    if (!activePetId || !canEdit || toggleReminderCompleteMutation.isPending) {
+    const reminderCanEdit = getCanEditReminder(reminder);
+    if (!reminder.petId || !reminderCanEdit || toggleReminderCompleteMutation.isPending) {
       return;
     }
 
     setFormError(null);
 
     try {
-      await toggleReminderCompleteMutation.mutateAsync({
-        petId: activePetId,
-        reminderId: reminder.id,
-        isCompleted: !reminder.isCompleted,
-      });
+      await toggleReminderCompleteMutation.mutateAsync(
+        {
+          petId: reminder.petId,
+          reminderId: reminder.id,
+          isCompleted: !reminder.isCompleted,
+        },
+        {
+          onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['reminders', 'all_pets'] });
+          },
+        }
+      );
     } catch (error) {
       setFormError(getReminderErrorMessage(error));
     }
@@ -332,10 +399,12 @@ export default function RemindersScreen() {
             <Text style={styles.subtitle}>
               {isFormOpen
                 ? t('reminders.formDesc')
-                : (selectedPet ? `${selectedPet.name} ${t('reminders.forPet')}` : t('reminders.selectPet'))}
+                : (selectedPetId === null
+                    ? t('reminders.allPetsDesc')
+                    : (selectedPet ? `${selectedPet.name} ${t('reminders.forPet')}` : t('reminders.selectPet')))}
             </Text>
           </View>
-          {canEdit ? (
+          {isFormOpen || (selectedPetId !== null && canEdit) ? (
             <Pressable
               accessibilityRole="button"
               onPress={isFormOpen ? closeForm : openCreateForm}
@@ -359,8 +428,28 @@ export default function RemindersScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.petScrollerContainer}
             contentContainerStyle={styles.petScroller}
           >
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setSelectedPetId(null)}
+              style={({ pressed }) => [
+                styles.petChip,
+                selectedPetId === null && styles.petChipSelected,
+                pressed && styles.pressed,
+              ]}
+            >
+              <View style={styles.petChipContent}>
+                <View style={[styles.petChipAvatar, { backgroundColor: colors.accent + '18' }]}>
+                  <Text style={styles.petChipEmoji}>🐾</Text>
+                </View>
+                <Text style={[styles.petChipName, selectedPetId === null && styles.petChipNameSelected]}>
+                  {t('reminders.allPets')}
+                </Text>
+              </View>
+            </Pressable>
+
             {pets.map((pet) => {
               const isSelected = pet.id === selectedPetId;
               const cfg = speciesConfig[pet.species];
@@ -376,38 +465,42 @@ export default function RemindersScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '18' }]}>
-                    <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
+                  <View style={styles.petChipContent}>
+                    <View style={[styles.petChipAvatar, { backgroundColor: cfg.color + '18' }]}>
+                      <Text style={styles.petChipEmoji}>{cfg.emoji}</Text>
+                    </View>
+                    <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
+                      {pet.name}
+                    </Text>
                   </View>
-                  <Text style={[styles.petChipName, isSelected && styles.petChipNameSelected]}>
-                    {pet.name}
-                  </Text>
                 </Pressable>
               );
             })}
           </ScrollView>
         ) : null}
 
-        {petsQuery.isLoading ? <LoadingState label={t("reminders.loading")} /> : null}
-        {petsQuery.error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
-          </View>
-        ) : null}
-
-        {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 ? (
-          <Card>
-            <EmptyState
-              icon="🐾"
-              title={t("reminders.noPetTitle")}
-              text={t("reminders.noPetDesc")}
-            />
-          </Card>
-        ) : null}
-
-        {selectedPet && realtime.error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{realtime.error}</Text>
+        {petsQuery.isLoading || petsQuery.error || (!petsQuery.isLoading && !petsQuery.error && pets.length === 0) || (selectedPet && realtime.error) ? (
+          <View>
+            {petsQuery.isLoading && <LoadingState label={t("reminders.loading")} />}
+            {petsQuery.error && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
+              </View>
+            )}
+            {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 && (
+              <Card>
+                <EmptyState
+                  icon="🐾"
+                  title={t("reminders.noPetTitle")}
+                  text={t("reminders.noPetDesc")}
+                />
+              </Card>
+            )}
+            {selectedPet && realtime.error && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{realtime.error}</Text>
+              </View>
+            )}
           </View>
         ) : null}
 
@@ -450,7 +543,7 @@ export default function RemindersScreen() {
 
             {/* Date Selection */}
             <View style={styles.field}>
-              <Text style={styles.label}>Tarih</Text>
+              <Text style={styles.label}>{t("reminders.date")}</Text>
               <Pressable onPress={() => setShowDatePicker(true)} style={styles.pickerTrigger}>
                 <Feather name="calendar" size={16} color={colors.textSecondary} />
                 <Text style={styles.pickerTriggerText}>
@@ -472,7 +565,7 @@ export default function RemindersScreen() {
 
             {/* Optional Time Selection */}
             <View style={styles.switchRow}>
-              <Text style={styles.label}>Saat Ekle (Opsiyonel)</Text>
+              <Text style={styles.label}>{t("reminders.addTimeOptional")}</Text>
               <Switch
                 value={hasTime}
                 onValueChange={(val) => {
@@ -488,7 +581,7 @@ export default function RemindersScreen() {
               <Pressable onPress={() => setShowTimePicker(true)} style={styles.pickerTrigger}>
                 <Feather name="clock" size={16} color={colors.textSecondary} />
                 <Text style={styles.pickerTriggerText}>
-                  Saat: {selectedDate.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
+                  {t("reminders.timeLabel")}: {selectedDate.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </Pressable>
             )}
@@ -506,7 +599,7 @@ export default function RemindersScreen() {
             )}
 
             <View style={styles.field}>
-              <Text style={styles.label}>Tekrar</Text>
+              <Text style={styles.label}>{t("reminders.recurrenceLabel")}</Text>
               <View style={styles.optionGrid}>
                 {recurrenceOptions.map((option) => (
                   <Pressable
@@ -534,7 +627,7 @@ export default function RemindersScreen() {
             <View style={styles.segmentedContainer}>
               <Text style={styles.label}>{t("reminders.remind")}</Text>
               <SegmentedControl
-                options={notifyOptions}
+                options={notificationOptions}
                 value={notifyState}
                 onChange={setNotifyState}
               />
@@ -542,9 +635,12 @@ export default function RemindersScreen() {
 
             {editingReminder ? (
               <View style={styles.segmentedContainer}>
-                <Text style={styles.label}>Durum</Text>
+                <Text style={styles.label}>{t("reminders.status")}</Text>
                 <SegmentedControl
-                  options={activeOptions}
+                  options={[
+                    { label: t('reminders.active'), value: 'active' },
+                    { label: t('reminders.inactive'), value: 'inactive' },
+                  ]}
                   value={activeState}
                   onChange={setActiveState}
                 />
@@ -571,12 +667,12 @@ export default function RemindersScreen() {
         ) : null}
 
         {/* List Mode */}
-        {selectedPet && !isFormOpen ? (
+        {!isFormOpen && (selectedPet || selectedPetId === null) ? (
           <>
-            {selectedPet && !canEdit && !petQuery.isLoading ? (
+            {selectedPetId !== null && !canEdit && !petQuery.isLoading ? (
               <View style={styles.readOnlyBox}>
                 <Feather name="eye" size={15} color={colors.textSecondary} />
-                <Text style={styles.readOnlyText}>Salt Okunur Mod</Text>
+                <Text style={styles.readOnlyText}>{t("reminders.readOnlyMode")}</Text>
               </View>
             ) : null}
 
@@ -603,11 +699,12 @@ export default function RemindersScreen() {
                     minute: '2-digit',
                   });
                   const hasCustomTime = toReminderDate(reminder.remindAt)?.getHours() !== 9 || toReminderDate(reminder.remindAt)?.getMinutes() !== 0;
+                  const reminderPet = pets.find((p) => p.id === reminder.petId);
 
                   return (
                     <View key={reminder.id} style={[styles.reminderRow, isDone && styles.reminderRowDone]}>
                       <Pressable
-                        disabled={!canEdit || toggleReminderCompleteMutation.isPending}
+                        disabled={!getCanEditReminder(reminder) || toggleReminderCompleteMutation.isPending}
                         onPress={() => handleToggleComplete(reminder)}
                         style={({ pressed }) => [
                           styles.checkCircle,
@@ -632,15 +729,16 @@ export default function RemindersScreen() {
                           {reminder.title}
                         </Text>
                         <Text style={styles.reminderMeta} numberOfLines={1}>
+                          {selectedPetId === null && reminderPet ? `${reminderPet.name} · ` : ''}
                           {reminderTypeLabels[reminder.reminderType]} · {reminderRecurrenceLabels[reminder.recurrence]}
-                          {hasCustomTime && ` · Saat: ${timeFormatted}`}
+                          {hasCustomTime && ` · ${t('reminders.timeLabel')}: ${timeFormatted}`}
                         </Text>
                       </View>
                       <View style={styles.reminderSide}>
                         <Text style={[styles.reminderDate, isDone && styles.reminderDateDone]}>
                           {formatReminderDateLabel(reminder.remindAt)}
                         </Text>
-                        {canEdit ? (
+                        {getCanEditReminder(reminder) ? (
                           <View style={styles.rowActions}>
                             <Pressable
                               accessibilityRole="button"
@@ -681,7 +779,7 @@ export default function RemindersScreen() {
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>{t('reminders.selectDate')}</Text>
                   <Pressable onPress={() => setShowDatePicker(false)} style={styles.modalDoneBtn}>
-                    <Text style={styles.modalDoneText}>Tamam</Text>
+                    <Text style={styles.modalDoneText}>{t("common.done")}</Text>
                   </Pressable>
                 </View>
                 <DateTimePicker
@@ -710,7 +808,7 @@ export default function RemindersScreen() {
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>{t('reminders.selectTime')}</Text>
                   <Pressable onPress={() => setShowTimePicker(false)} style={styles.modalDoneBtn}>
-                    <Text style={styles.modalDoneText}>Tamam</Text>
+                    <Text style={styles.modalDoneText}>{t("common.done")}</Text>
                   </Pressable>
                 </View>
                 <DateTimePicker
@@ -784,17 +882,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     paddingVertical: 4,
   },
+  petScrollerContainer: {
+    height: 92,
+  },
   petChip: {
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.surfaceBorder,
-    borderRadius: radius.pill,
+    borderRadius: 42,
     borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    minWidth: 104,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    width: 84,
+    height: 84,
     ...shadows.sm,
   },
   petChipSelected: {
@@ -802,20 +901,26 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
     ...shadows.accent,
   },
-  petChipAvatar: {
+  petChipContent: {
     alignItems: 'center',
-    borderRadius: radius.pill,
-    height: 30,
     justifyContent: 'center',
-    width: 30,
+    gap: 2,
+  },
+  petChipAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   petChipEmoji: {
     fontSize: 16,
   },
   petChipName: {
+    fontSize: 11,
+    fontWeight: fontWeight.semibold,
     color: colors.textSecondary,
-    fontSize: typography.caption,
-    fontWeight: fontWeight.bold,
+    textAlign: 'center',
   },
   petChipNameSelected: {
     color: colors.accent,

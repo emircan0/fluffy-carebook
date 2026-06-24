@@ -8,6 +8,7 @@ import {
   where,
 } from 'firebase/firestore';
 
+import i18n from './i18n';
 import { firebaseConfigError } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
 import type { Measurement } from '../types/app';
@@ -84,7 +85,7 @@ export async function createMeasurement({
   const user = auth?.currentUser;
 
   if (!user) {
-    throw new Error('Ölçüm eklemek için giriş yapmalısınız.');
+    throw new Error(i18n.t('pet.authRequiredForMeasurement'));
   }
 
   const ref = collection(db, 'pets', petId, 'measurements');

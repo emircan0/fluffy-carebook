@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable, Platform, Modal, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { SafeDateTimePicker as DateTimePicker } from '../../components/ui/SafeDateTimePicker';
 
 import { colors, layout, radius, spacing, typography, fontWeight, shadows } from '../../lib/theme';
@@ -18,6 +19,7 @@ import type { ExpenseCategory, Expense } from '../../types/app';
 import { useExpenses } from '../../lib/queries/useExpenses';
 
 export default function ExpenseFormScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id, petId } = useLocalSearchParams<{ id: string; petId?: string }>();
   
@@ -90,13 +92,13 @@ export default function ExpenseFormScreen() {
     if (!activePetId) return;
     
     if (!title.trim()) {
-      setFormError('Masraf başlığı zorunlu.');
+      setFormError(t('expense.titleRequired'));
       return;
     }
     
     const amountVal = parseFloat(amount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      setFormError('Geçerli bir tutar girmelisiniz.');
+      setFormError(t('expense.validAmountRequired'));
       return;
     }
 
@@ -125,24 +127,24 @@ export default function ExpenseFormScreen() {
       }
       router.back();
     } catch (error: any) {
-      setFormError(error.message || 'Bir hata oluştu.');
+      setFormError(error.message || t('expense.saveError'));
     }
   };
 
   const handleDelete = () => {
     if (!activePetId || isNew) return;
     
-    Alert.alert('Sil', 'Bu masrafı silmek istediğinize emin misiniz?', [
-      { text: 'İptal', style: 'cancel' },
+    Alert.alert(t('expense.delete'), t('expense.deleteConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sil',
+        text: t('expense.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteExpenseMutation.mutateAsync({ petId: activePetId, expenseId: id });
             router.back();
           } catch (error: any) {
-            setFormError(error.message || 'Silinirken bir hata oluştu.');
+            setFormError(error.message || t('expense.deleteError'));
           }
         }
       }
@@ -157,13 +159,13 @@ export default function ExpenseFormScreen() {
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={colors.textPrimary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>{isNew ? 'Yeni Masraf' : 'Masraf Detayı'}</Text>
+        <Text style={styles.topBarTitle}>{isNew ? t('expense.newExpense') : t('expense.expenseDetail')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.field}>
-          <Text style={styles.label}>Kategori</Text>
+          <Text style={styles.label}>{t('expense.category')}</Text>
           <View style={styles.categoryGrid}>
             {(Object.keys(expenseCategoryLabels) as ExpenseCategory[]).map(cat => (
               <Pressable
@@ -188,7 +190,7 @@ export default function ExpenseFormScreen() {
 
         <Input
           editable={!isSaving && !updateExpenseMutation.isPending && canEdit}
-          label="Tutar (₺)"
+          label={t('expense.amount')}
           keyboardType="decimal-pad"
           onChangeText={setAmount}
           placeholder="0.00"
@@ -198,15 +200,15 @@ export default function ExpenseFormScreen() {
 
         <Input
           editable={!isSaving && !updateExpenseMutation.isPending && canEdit}
-          label="Başlık"
+          label={t('expense.title')}
           onChangeText={setTitle}
-          placeholder="Örn: Royal Canin 15kg"
+          placeholder={t('expense.titlePlaceholder')}
           value={title}
         />
 
         {/* Date Selection */}
         <View style={styles.field}>
-          <Text style={styles.label}>Tarih</Text>
+          <Text style={styles.label}>{t('expense.date')}</Text>
           <Pressable 
             disabled={!canEdit || isSaving || updateExpenseMutation.isPending}
             onPress={() => setShowDatePicker(true)} 
@@ -224,10 +226,10 @@ export default function ExpenseFormScreen() {
 
         <Input
           editable={!isSaving && !updateExpenseMutation.isPending && canEdit}
-          label="Özel Not"
+          label={t('expense.notes')}
           multiline
           onChangeText={setNotes}
-          placeholder="İsteğe bağlı..."
+          placeholder={t('expense.notesPlaceholder')}
           value={notes}
         />
 
@@ -243,7 +245,7 @@ export default function ExpenseFormScreen() {
           {isNew ? (
             <Button
               disabled={!title.trim() || !amount.trim() || isSaving}
-              label="Kaydet"
+              label={t('expense.save')}
               loading={isSaving}
               onPress={handleSubmit}
               size="lg"
@@ -253,7 +255,7 @@ export default function ExpenseFormScreen() {
             <View style={styles.actionButtonsStacked}>
               <Button
                 disabled={!title.trim() || !amount.trim() || isSaving || updateExpenseMutation.isPending}
-                label="Değişiklikleri Kaydet"
+                label={t('expense.saveChanges')}
                 loading={updateExpenseMutation.isPending}
                 onPress={handleSubmit}
                 size="lg"
@@ -262,7 +264,7 @@ export default function ExpenseFormScreen() {
               />
               <Button
                 disabled={deleteExpenseMutation.isPending || isSaving || updateExpenseMutation.isPending}
-                label="Masrafı Sil"
+                label={t('expense.delete')}
                 loading={deleteExpenseMutation.isPending}
                 onPress={handleDelete}
                 size="lg"
@@ -295,9 +297,9 @@ export default function ExpenseFormScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Tarih Seçin</Text>
+                <Text style={styles.modalTitle}>{t('expense.selectDate')}</Text>
                 <Pressable onPress={() => setShowDatePicker(false)} style={styles.modalDoneBtn}>
-                  <Text style={styles.modalDoneText}>Tamam</Text>
+                  <Text style={styles.modalDoneText}>{t('common.done')}</Text>
                 </Pressable>
               </View>
               <DateTimePicker

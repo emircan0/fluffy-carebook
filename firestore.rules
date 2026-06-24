@@ -448,6 +448,7 @@ service cloud.firestore {
       allow delete: if isPetOwner(petId);
 
       match /members/{userId} {
+        allow get: if signedIn() && userId == request.auth.uid;
         allow read: if isPetMember(petId);
 
         allow create: if (signedIn()
@@ -460,7 +461,8 @@ service cloud.firestore {
           && getAfter(/databases/$(database)/documents/pets/$(petId)).data.ownerId == request.auth.uid)
           || isValidAcceptInviteMemberCreate(petId, userId);
 
-        allow update, delete: if isPetOwner(petId);
+        allow update: if isPetOwner(petId);
+        allow delete: if isPetOwner(petId) && resource.data.role != 'owner';
       }
 
       match /careTasks/{taskId} {
@@ -499,12 +501,14 @@ service cloud.firestore {
     }
 
     match /invites/{inviteToken} {
-      allow read: if signedIn()
+      allow get: if signedIn()
         && (
-          resource.data.status == 'pending'
+          resource == null
+          || resource.data.status == 'pending'
           || resource.data.acceptedBy == request.auth.uid
           || isPetOwner(resource.data.petId)
         );
+      allow list: if false;
 
       allow create: if signedIn() && validInviteCreate(inviteToken);
       allow update: if signedIn() && validInviteAcceptUpdate();

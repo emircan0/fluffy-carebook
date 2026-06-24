@@ -62,6 +62,9 @@ export type CareEventType =
   | 'walk'
   | 'bath'
   | 'grooming'
+  | 'play'
+  | 'training'
+  | 'teeth'
   | 'other';
 
 export type CareScheduleType = 'none' | 'daily' | 'weekly' | 'monthly';

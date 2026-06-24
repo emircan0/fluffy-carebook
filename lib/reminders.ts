@@ -11,24 +11,25 @@ import {
 
 import { firebaseConfigError } from './auth';
 import { firestore, hasFirebaseConfig } from './firebase';
+import i18n from './i18n';
 import type { Reminder, ReminderRecurrence, ReminderType } from '../types/app';
 
-export const reminderTypeLabels: Record<ReminderType, string> = {
-  vaccine: 'Aşı',
-  internal_parasite: 'İç parazit',
-  external_parasite: 'Dış parazit',
-  medicine: 'İlaç',
-  vet: 'Veteriner',
-  other: 'Diğer',
-};
+export const reminderTypeLabels = {
+  get vaccine() { return i18n.t('reminders.types.vaccine'); },
+  get internal_parasite() { return i18n.t('reminders.types.internal_parasite'); },
+  get external_parasite() { return i18n.t('reminders.types.external_parasite'); },
+  get medicine() { return i18n.t('reminders.types.medicine'); },
+  get vet() { return i18n.t('reminders.types.vet'); },
+  get other() { return i18n.t('reminders.types.other'); },
+} as Record<ReminderType, string>;
 
-export const reminderRecurrenceLabels: Record<ReminderRecurrence, string> = {
-  none: 'Tek sefer',
-  daily: 'Günlük',
-  weekly: 'Haftalık',
-  monthly: 'Aylık',
-  yearly: 'Yıllık',
-};
+export const reminderRecurrenceLabels = {
+  get none() { return i18n.t('reminders.recurrence.none'); },
+  get daily() { return i18n.t('reminders.recurrence.daily'); },
+  get weekly() { return i18n.t('reminders.recurrence.weekly'); },
+  get monthly() { return i18n.t('reminders.recurrence.monthly'); },
+  get yearly() { return i18n.t('reminders.recurrence.yearly'); },
+} as Record<ReminderRecurrence, string>;
 
 export const reminderTypeIcons: Record<ReminderType, string> = {
   vaccine: '💉',
@@ -60,11 +61,11 @@ export type UpdateReminderInput = {
 };
 
 export const reminderMessages = {
-  missingAuth: 'Hatırlatıcı işlemleri için giriş yapmalısınız.',
-  missingTitle: 'Hatırlatıcı başlığı zorunlu.',
-  missingDate: 'Hatırlatıcı tarihi zorunlu.',
-  editOnly: 'Bu işlem için owner veya editor rolü gerekir.',
-  invalidDate: 'Tarih formatı geçerli değil.',
+  get missingAuth() { return i18n.t('reminders.missingAuth'); },
+  get missingTitle() { return i18n.t('reminders.missingTitle'); },
+  get missingDate() { return i18n.t('reminders.missingDate'); },
+  get editOnly() { return i18n.t('reminders.editOnly'); },
+  get invalidDate() { return i18n.t('reminders.invalidDate'); },
 };
 
 function requireFirestore() {
@@ -129,15 +130,15 @@ export function formatReminderDateLabel(value: unknown, now = new Date()) {
   const diffDays = diffLocalDays(date, now);
 
   if (diffDays === 0) {
-    return 'Bugün';
+    return i18n.t('date.today');
   }
 
   if (diffDays === 1) {
-    return 'Yarın';
+    return i18n.t('date.tomorrow');
   }
 
   if (diffDays > 1 && diffDays <= 14) {
-    return `${diffDays} gün sonra`;
+    return i18n.t('date.daysLater', { count: diffDays });
   }
 
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
@@ -210,7 +211,7 @@ export function getReminderErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Hatırlatıcı işlemi tamamlanamadı. Lütfen tekrar deneyin.';
+  return i18n.t('reminders.genericError');
 }
 
 export async function listReminders(petId: string) {
