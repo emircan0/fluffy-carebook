@@ -29,13 +29,13 @@ type SettingRow = {
   route?: any;
 };
 
-const termsText = `YuvioPet - Kullanım Koşulları
+const termsText = `Fluffy Carebook - Kullanım Koşulları
 Son Güncelleme: 22 Haziran 2026
 
-YuvioPet mobil uygulamasını ("Uygulama") indirerek, yükleyerek veya kullanarak, bu Kullanım Koşulları'nı tamamen ve koşulsuz olarak kabul etmiş olursunuz. Şartları kabul etmiyorsanız lütfen Uygulama'yı kullanmayınız.
+Fluffy Carebook mobil uygulamasını ("Uygulama") indirerek, yükleyerek veya kullanarak, bu Kullanım Koşulları'nı tamamen ve koşulsuz olarak kabul etmiş olursunuz. Şartları kabul etmiyorsanız lütfen Uygulama'yı kullanmayınız.
 
 1. Hizmet Tanımı ve Amacı
-YuvioPet, evcil hayvan sahiplerinin ve bakıcılarının evcil canların günlük beslenme, ilaç, temizlik, yürüyüş rutinlerini ortaklaşa takip etmesini ve gelişim verilerini (kilo/boy) kaydetmesini sağlayan kişisel bir izleme uygulamasıdır. Uygulama ticari bir amaç gütmez ve hiçbir koşulda veterinerlik veya tıbbi tavsiye niteliği taşımaz.
+Fluffy Carebook, evcil hayvan sahiplerinin ve bakıcılarının evcil canların günlük beslenme, ilaç, temizlik, yürüyüş rutinlerini ortaklaşa takip etmesini ve gelişim verilerini (kilo/boy) kaydetmesini sağlayan kişisel bir izleme uygulamasıdır. Uygulama ticari bir amaç gütmez ve hiçbir koşulda veterinerlik veya tıbbi tavsiye niteliği taşımaz.
 
 2. Hesap Güvenliği ve Kullanıcı Sorumluluğu
 - Uygulamaya giriş yapmak için Firebase Authentication altyapısı kullanılmaktadır. Hesap şifrenizin ve giriş bilgilerinizin gizliliğini korumak tamamen sizin sorumluluğunuzdadır.
@@ -46,15 +46,15 @@ YuvioPet, evcil hayvan sahiplerinin ve bakıcılarının evcil canların günlü
 Uygulamada girilen veya hesaplanan veriler (örneğin kilo gelişim grafikleri, yaş gösterimleri, ilaç takvimleri) yalnızca bilgi amaçlıdır. Evcil hayvanınızın sağlığıyla ilgili her türlü teşhis, tedavi veya tıbbi karar için mutlaka profesyonel bir veteriner hekime başvurmalısınız.
 
 4. Sorumluluk Sınırları ve Garanti Muafiyeti
-Uygulama "olduğu gibi" ve "kullanıma sunulduğu şekliyle" sağlanmaktadır. YuvioPet; verilerin kaybı, silinmesi veya bulut sunucu kesintilerinden; uygulama üzerindeki teknik aksaklıklar veya bildirim gecikmelerinden kaynaklanabilecek doğrudan, dolaylı hiçbir zarardan sorumlu tutulamaz.
+Uygulama "olduğu gibi" ve "kullanıma sunulduğu şekliyle" sağlanmaktadır. Fluffy Carebook; verilerin kaybı, silinmesi veya bulut sunucu kesintilerinden; uygulama üzerindeki teknik aksaklıklar veya bildirim gecikmelerinden kaynaklanabilecek doğrudan, dolaylı hiçbir zarardan sorumlu tutulamaz.
 
 5. Değişiklikler ve Fesih
-YuvioPet, bu Kullanım Koşulları'nı dilediği zaman güncelleme hakkını saklı tutar. Yapılan değişiklikler Uygulama içinde veya bu web adresinde yayınlandığı andan itibaren geçerlilik kazanır.`;
+Fluffy Carebook, bu Kullanım Koşulları'nı dilediği zaman güncelleme hakkını saklı tutar. Yapılan değişiklikler Uygulama içinde veya bu web adresinde yayınlandığı andan itibaren geçerlilik kazanır.`;
 
-const privacyText = `YuvioPet - Gizlilik Politikası
+const privacyText = `Fluffy Carebook - Gizlilik Politikası
 Son Güncelleme: 22 Haziran 2026
 
-YuvioPet ("Uygulama") olarak gizliliğinize ve kişisel verilerinizin korunmasına büyük önem veriyoruz. Bu Gizlilik Politikası, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve Genel Veri Koruma Yönetmeliği ("GDPR") uyumluluğu gözetilerek hazırlanmıştır.
+Fluffy Carebook ("Uygulama") olarak gizliliğinize ve kişisel verilerinizin korunmasına büyük önem veriyoruz. Bu Gizlilik Politikası, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") ve Genel Veri Koruma Yönetmeliği ("GDPR") uyumluluğu gözetilerek hazırlanmıştır.
 
 1. Toplanan Kişisel Veriler
 Uygulamayı kullanırken aşağıdaki veriler toplanmakta ve işlenmektedir:
@@ -70,19 +70,19 @@ Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:
 
 3. Verilerin Depolanması ve Üçüncü Taraflarla Paylaşım
 - Verileriniz, Google Cloud Platform bünyesindeki Firebase Firestore ve Firebase Authentication sunucularında en yüksek güvenlik standartlarında depolanmaktadır.
-- YuvioPet, kişisel verilerinizi asla üçüncü taraflara satmaz veya pazarlama amacıyla paylaşmaz.
-- Evcil hayvan verileri yalnızca sizin davet linki göndererek yetkilendirdiğiniz diğer YuvioPet kullanıcıları tarafından görüntülenebilir.
+- Fluffy Carebook, kişisel verilerinizi asla üçüncü taraflara satmaz veya pazarlama amacıyla paylaşmaz.
+- Evcil hayvan verileri yalnızca sizin davet linki göndererek yetkilendirdiğiniz diğer Fluffy Carebook kullanıcıları tarafından görüntülenebilir.
 
 4. Kullanıcı Hakları (KVKK md. 11 ve GDPR)
 Verilerinizi güncelleme, düzeltme veya tamamen silme hakkına sahipsiniz. Profilinizde yer alan "Hesabı Sil" butonunu kullanarak verilerinizi anında pasife alabilirsiniz. Verilerin tamamen kaldırılması talebi için emircanmertt@gmail.com adresi üzerinden iletişime geçebilirsiniz.`;
 
-const termsTextEn = `YuvioPet - Terms of Service
+const termsTextEn = `Fluffy Carebook - Terms of Service
 Last Updated: June 22, 2026
 
-By downloading, installing, or using the YuvioPet mobile application ("App"), you completely and unconditionally accept these Terms of Service. If you do not accept the terms, please do not use the App.
+By downloading, installing, or using the Fluffy Carebook mobile application ("App"), you completely and unconditionally accept these Terms of Service. If you do not accept the terms, please do not use the App.
 
 1. Description of Service and Purpose
-YuvioPet is a personal tracking application that allows pet owners and caregivers to collaboratively track their pets' daily feeding, medication, cleaning, and walking routines, as well as record growth data (weight/height). The App is non-commercial and in no way constitutes veterinary or medical advice.
+Fluffy Carebook is a personal tracking application that allows pet owners and caregivers to collaboratively track their pets' daily feeding, medication, cleaning, and walking routines, as well as record growth data (weight/height). The App is non-commercial and in no way constitutes veterinary or medical advice.
 
 2. Account Security and User Responsibility
 - Firebase Authentication infrastructure is used to log into the application. You are solely responsible for maintaining the confidentiality of your account password and login information.
@@ -93,15 +93,15 @@ YuvioPet is a personal tracking application that allows pet owners and caregiver
 The data entered or calculated in the application (such as weight growth charts, age displays, medication schedules) is for informational purposes only. You must always consult a professional veterinarian for any diagnosis, treatment, or medical decisions regarding your pet's health.
 
 4. Limitation of Liability and Warranty Disclaimer
-The App is provided "as is" and "as available". YuvioPet cannot be held liable for any direct or indirect damages that may arise from data loss, deletion, cloud server interruptions, technical glitches within the application, or notification delays.
+The App is provided "as is" and "as available". Fluffy Carebook cannot be held liable for any direct or indirect damages that may arise from data loss, deletion, cloud server interruptions, technical glitches within the application, or notification delays.
 
 5. Modifications and Termination
-YuvioPet reserves the right to update these Terms of Service at any time. Changes become effective as soon as they are published within the App or on this web address.`;
+Fluffy Carebook reserves the right to update these Terms of Service at any time. Changes become effective as soon as they are published within the App or on this web address.`;
 
-const privacyTextEn = `YuvioPet - Privacy Policy
+const privacyTextEn = `Fluffy Carebook - Privacy Policy
 Last Updated: June 22, 2026
 
-At YuvioPet ("App"), we attach great importance to your privacy and the protection of your personal data. This Privacy Policy has been prepared in compliance with the Personal Data Protection Law No. 6698 ("KVKK") and the General Data Protection Regulation ("GDPR").
+At Fluffy Carebook ("App"), we attach great importance to your privacy and the protection of your personal data. This Privacy Policy has been prepared in compliance with the Personal Data Protection Law No. 6698 ("KVKK") and the General Data Protection Regulation ("GDPR").
 
 1. Collected Personal Data
 While using the App, the following data is collected and processed:
@@ -117,8 +117,8 @@ Your personal data is processed for the following purposes:
 
 3. Data Storage and Sharing with Third Parties
 - Your data is stored on Firebase Firestore and Firebase Authentication servers within the Google Cloud Platform at the highest security standards.
-- YuvioPet will never sell your personal data to third parties or share it for marketing purposes.
-- Pet data can only be viewed by other YuvioPet users whom you authorize by sending an invitation link.
+- Fluffy Carebook will never sell your personal data to third parties or share it for marketing purposes.
+- Pet data can only be viewed by other Fluffy Carebook users whom you authorize by sending an invitation link.
 
 4. User Rights (KVKK Art. 11 and GDPR)
 You have the right to update, correct, or completely delete your data. You can instantly deactivate your data by using the "Delete Account" button in your profile. For requests to completely remove data, you can contact us at emircanmertt@gmail.com.`;

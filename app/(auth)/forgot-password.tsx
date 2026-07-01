@@ -68,7 +68,7 @@ export default function ForgotPasswordScreen() {
             <View style={styles.logoBox}>
               <Text style={styles.logoEmoji}>🔑</Text>
             </View>
-            <Text style={styles.wordmark}>YuvioPet</Text>
+            <Text style={styles.wordmark}>Fluffy Carebook</Text>
             <Text style={styles.hero}>{t('auth.forgotPasswordTitle')}</Text>
             <Text style={styles.tagline}>
               {t('auth.forgotPasswordTagline')}

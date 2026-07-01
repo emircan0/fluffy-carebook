@@ -1,4 +1,4 @@
-# docs/KNOWN_RISKS.md - YuvioPet Bilinen Riskler
+# docs/KNOWN_RISKS.md - Fluffy Carebook Bilinen Riskler
 
 ## Beta Oncesi Teknik Riskler
 
@@ -12,6 +12,6 @@
 - Firebase Auth native persistence ileride AsyncStorage persistence ile iyilestirilebilir.
 - Production reminder push scheduler henuz kurulmadı.
 - Local `ios/` metadata Sprint 15'te Expo config ile esitlendi; ileride `npx expo prebuild` calistirilirsa native diff yeniden kontrol edilmelidir.
-- Marka adi YuvioPet olarak guncellendi. Store yayinindan once Google Play, App Store, domain ve marka tescil kontrolu yapilmalidir.
+- Marka adi Fluffy Carebook olarak guncellendi. Store yayinindan once Google Play, App Store, domain ve marka tescil kontrolu yapilmalidir.
 - Kesin hukuki uygunluk icin marka danismani veya avukat kontrolu gerekir.
-- TODO: YuvioPet icin ozel app icon ve splash hazirlanacak.
+- TODO: Fluffy Carebook icin ozel app icon ve splash hazirlanacak.

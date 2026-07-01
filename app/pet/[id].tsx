@@ -834,11 +834,11 @@ export default function PetDetailScreen() {
               variant="secondary"
             />
             {inviteLink && pet ? (
-              <View style={styles.yuvioPassCard}>
+              <View style={styles.carebookPassCard}>
                 {/* Ticket Top */}
                 <View style={styles.ticketTop}>
                   <View style={styles.ticketHeader}>
-                    <Text style={styles.ticketBrand}>🎟️ YUVIOPASS</Text>
+                    <Text style={styles.ticketBrand}>🎟️ CAREBOOK PASS</Text>
                     <Badge 
                       label={t(`roles.${inviteRole}`)} 
                       variant={roleBadgeVariants[inviteRole]} 
@@ -1400,7 +1400,7 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
 
-  // Added Top bar, activity range, stats and YuvioPass ticket styles
+  // Added Top bar, activity range, stats and CarebookPass ticket styles
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1484,7 +1484,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontWeight: fontWeight.semibold,
   },
-  yuvioPassCard: {
+  carebookPassCard: {
     backgroundColor: colors.surfaceRaised,
     borderRadius: radius.xl,
     borderWidth: 1,

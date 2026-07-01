@@ -49,7 +49,7 @@ export default function InviteScreen() {
             <Text style={styles.heroIconText}>💌</Text>
           </View>
           <View style={styles.header}>
-            <Text style={styles.eyebrow}>YuvioPet</Text>
+            <Text style={styles.eyebrow}>Fluffy Carebook</Text>
             <Text style={styles.title}>{t('invite.careInvite')}</Text>
             <Text style={styles.subtitle}>{t('invite.subtitle')}</Text>
           </View>

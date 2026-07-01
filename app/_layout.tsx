@@ -163,7 +163,7 @@ function RootLayoutContent() {
 
           {/* App Title */}
           <Animated.Text style={[styles.splashText, textAnimatedStyle]}>
-            YuvioPet
+            Fluffy Carebook
           </Animated.Text>
 
           {/* Loading indicator */}

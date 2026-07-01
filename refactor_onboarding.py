@@ -40,7 +40,7 @@ content = content.replace("'Davet için önce pet oluşturmalısınız.'", "t('e
 content = content.replace("'Davet linki kopyalandı.'", "t('errors.inviteLinkCopied')")
 
 # UI Texts
-content = content.replace("YuvioPet’e hoş geldin", "{t('onboarding.welcomeTitle')}")
+content = content.replace("Fluffy Carebook’a hoş geldin", "{t('onboarding.welcomeTitle')}")
 content = content.replace("Evcil dostunun bakımını birlikte takip et.", "{t('onboarding.welcomeDesc1')}")
 content = content.replace("Mama, ilaç, kum, yürüyüş ve hatırlatmaları evdeki herkes tek yerden görsün.", "{t('onboarding.welcomeDesc2')}")
 content = content.replace('"Kurulum kontrol ediliyor"', "{t('onboarding.checkingSetup')}")

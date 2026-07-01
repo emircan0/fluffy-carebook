@@ -1,6 +1,6 @@
-# docs/FIRESTORE_RULES.md - YuvioPet Firebase Security Rules Notlari
+# docs/FIRESTORE_RULES.md - Fluffy Carebook Firebase Security Rules Notlari
 
-YuvioPet, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Rules katmani pet bazli ortak bakim verisini member rolleriyle korur.
+Fluffy Carebook, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Rules katmani pet bazli ortak bakim verisini member rolleriyle korur.
 
 ## Guvenlik prensibi
 

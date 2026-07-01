@@ -24,7 +24,7 @@ content = content.replace("Şifre sıfırlama bağlantısı e-posta adresine gö
 content = content.replace('label="Giriş Ekranına Dön"', 'label={t("auth.backToLogin")}')
 
 content = content.replace('label="E-posta"', 'label={t("auth.email")}')
-content = content.replace('placeholder="ornek@yuviopet.app"', 'placeholder={t("auth.emailPlaceholder")}')
+content = content.replace('placeholder="ornek@fluffycarebook.app"', 'placeholder={t("auth.emailPlaceholder")}')
 
 content = content.replace('label="Şifre Sıfırlama Bağlantısı Gönder"', 'label={t("auth.sendResetLink")}')
 content = content.replace('label="Giriş ekranına geri dön"', 'label={t("auth.backToLoginSubtle")}')

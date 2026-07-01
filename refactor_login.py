@@ -43,8 +43,8 @@ content = content.replace(
 )
 
 # UI Text
-content = content.replace("YuvioPet’e{`\\n`}hoş geldin", "{t('auth.welcome')}")
-content = content.replace("YuvioPet’e{'\\n'}hoş geldin", "{t('auth.welcome')}")
+content = content.replace("Fluffy Carebook’a{`\\n`}hoş geldin", "{t('auth.welcome')}")
+content = content.replace("Fluffy Carebook’a{'\\n'}hoş geldin", "{t('auth.welcome')}")
 content = content.replace(
     "isRegister\n                ? 'Evcil dostunun bakımını ailece takip et.'\n                : 'Bakım akışına kaldığın yerden devam et.'",
     "isRegister\n                ? t('auth.taglineRegister')\n                : t('auth.taglineLogin')"
@@ -56,7 +56,7 @@ content = content.replace(".env dosyasını kontrol et.", "{t('auth.checkEnv')}"
 content = content.replace('label="Ad Soyad"', 'label={t("auth.fullName")}')
 content = content.replace('placeholder="Adın Soyadın"', 'placeholder={t("auth.fullNamePlaceholder")}')
 content = content.replace('label="E-posta"', 'label={t("auth.email")}')
-content = content.replace('placeholder="ornek@yuviopet.app"', 'placeholder={t("auth.emailPlaceholder")}')
+content = content.replace('placeholder="ornek@fluffycarebook.app"', 'placeholder={t("auth.emailPlaceholder")}')
 content = content.replace('label="Şifre"', 'label={t("auth.password")}')
 content = content.replace('placeholder="En az 6 karakter"', 'placeholder={t("auth.passwordPlaceholder")}')
 content = content.replace("hint={isRegister ? 'En az 6 karakter kullan.' : undefined}", "hint={isRegister ? t('auth.passwordHint') : undefined}")

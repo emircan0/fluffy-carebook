@@ -1,4 +1,4 @@
-# docs/BETA_QA_CHECKLIST.md - YuvioPet Beta QA Checklist
+# docs/BETA_QA_CHECKLIST.md - Fluffy Carebook Beta QA Checklist
 
 ## Auth
 

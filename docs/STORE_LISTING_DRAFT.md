@@ -1,8 +1,8 @@
-# YuvioPet Store Listing Draft
+# Fluffy Carebook Store Listing Draft
 
 ## App name
 
-YuvioPet
+Fluffy Carebook
 
 ## Subtitle
 
@@ -22,11 +22,11 @@ Shared pet care, reminders and daily logs for your family.
 
 ## Turkce uzun aciklama taslagi
 
-YuvioPet, evcil dostunun gunluk bakimini ailece takip etmeni saglar. Mama, su, ilac, kum, yuruyus, asi, parazit ve veteriner hatirlaticilarini tek yerde yonet. Evdeki herkes ayni pet profilini gorur, yapilan bakimlar aninda guncellenir.
+Fluffy Carebook, evcil dostunun gunluk bakimini ailece takip etmeni saglar. Mama, su, ilac, kum, yuruyus, asi, parazit ve veteriner hatirlaticilarini tek yerde yonet. Evdeki herkes ayni pet profilini gorur, yapilan bakimlar aninda guncellenir.
 
 ## English long description draft
 
-YuvioPet helps families manage shared pet care in one place. Track feeding, water, medicine, litter, walks, vaccines, parasite treatments and vet reminders. Everyone caring for your pet can stay in sync with daily logs and reminders.
+Fluffy Carebook helps families manage shared pet care in one place. Track feeding, water, medicine, litter, walks, vaccines, parasite treatments and vet reminders. Everyone caring for your pet can stay in sync with daily logs and reminders.
 
 ## Keyword ideas
 
@@ -47,7 +47,7 @@ YuvioPet helps families manage shared pet care in one place. Track feeding, wate
 
 ## Asset TODO
 
-TODO: YuvioPet icin ozel app icon ve splash hazirlanacak.
+TODO: Fluffy Carebook icin ozel app icon ve splash hazirlanacak.
 
 ## Pre-store checks
 

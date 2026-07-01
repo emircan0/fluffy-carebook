@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "YuvioPet",
+    "name": "Fluffy Carebook",
     "slug": "yuviopet",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "yuviopet",
+    "scheme": "fluffycarebook",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -18,7 +18,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "8",
+      "buildNumber": "11",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
@@ -37,7 +37,8 @@
     "extra": {
       "eas": {
         "projectId": "311037db-bb52-457a-ac1f-9729ed43d11e"
-      }
+      },
+      "router": {}
     },
     "plugins": [
       "expo-router",
@@ -59,6 +60,7 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-localization"
-    ]
+    ],
+    "owner": "emircanmert"
   }
 }

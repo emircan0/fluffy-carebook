@@ -1,4 +1,4 @@
-// YuvioPet Design System
+// Fluffy Carebook Design System
 // Warm light-mode base with one restrained sage accent.
 import { Platform } from 'react-native';
 

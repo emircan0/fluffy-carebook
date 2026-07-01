@@ -1,6 +1,6 @@
-# docs/PUSH_NOTIFICATIONS.md - YuvioPet Push Notification Taslagi
+# docs/PUSH_NOTIFICATIONS.md - Fluffy Carebook Push Notification Taslagi
 
-YuvioPet push kapsaminda asi, ilac, parazit ve veteriner hatirlaticilariyla aile ici bakim gorunurlugunu destekler.
+Fluffy Carebook push kapsaminda asi, ilac, parazit ve veteriner hatirlaticilariyla aile ici bakim gorunurlugunu destekler.
 
 ## Kapsam
 

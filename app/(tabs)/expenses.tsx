@@ -117,7 +117,7 @@ export default function ExpensesScreen() {
         </View>
 
         {/* Pet Scroller */}
-        {pets.length > 0 ? (
+        {pets.length > 0 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -168,30 +168,28 @@ export default function ExpensesScreen() {
               );
             })}
           </ScrollView>
-        ) : null}
+        )}
 
-        {petsQuery.isLoading || petsQuery.error || (!petsQuery.isLoading && !petsQuery.error && pets.length === 0) ? (
-          <View>
-            {petsQuery.isLoading && <LoadingState label={t("expenses.loading")} />}
-            {petsQuery.error && (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
-              </View>
-            )}
-            {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 && (
-              <Card>
-                <EmptyState
-                  icon="🐾"
-                  title={t("expenses.noPetTitle")}
-                  text={t("expenses.noPetDesc")}
-                />
-              </Card>
-            )}
+        {petsQuery.isLoading && <LoadingState label={t("expenses.loading")} />}
+        
+        {petsQuery.error && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{getPetErrorMessage(petsQuery.error)}</Text>
           </View>
-        ) : null}
+        )}
+        
+        {!petsQuery.isLoading && !petsQuery.error && pets.length === 0 && (
+          <Card>
+            <EmptyState
+              icon="🐾"
+              title={t("expenses.noPetTitle")}
+              text={t("expenses.noPetDesc")}
+            />
+          </Card>
+        )}
 
-        {pets.length > 0 ? (
-          <>
+        {pets.length > 0 && (
+          <View style={{ gap: spacing.xl }}>
             {/* Monthly Total Card */}
             <View style={styles.totalCard}>
               <View style={styles.totalCardTop}>
@@ -295,8 +293,8 @@ export default function ExpensesScreen() {
                 </View>
               )}
             </View>
-          </>
-        ) : null}
+          </View>
+        )}
       </ScrollView>
 
       {/* FAB */}
@@ -349,6 +347,8 @@ const styles = StyleSheet.create({
   },
   petScrollerContainer: {
     height: 92,
+    flexGrow: 0,
+    flexShrink: 0,
   },
   petChip: {
     alignItems: 'center',

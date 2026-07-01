@@ -177,7 +177,7 @@ export default function LoginScreen() {
                 </Pressable>
               </View>
             </View>
-            <Text style={styles.wordmark}>YuvioPet</Text>
+            <Text style={styles.wordmark}>Fluffy Carebook</Text>
             <Text style={styles.hero}>{t('auth.welcome')}</Text>
             <Text style={styles.tagline}>
               {isRegister

@@ -1,6 +1,6 @@
-# docs/IMPLEMENTATION_PLAN.md - YuvioPet Faz 1 Uygulama Plani
+# docs/IMPLEMENTATION_PLAN.md - Fluffy Carebook Faz 1 Uygulama Plani
 
-YuvioPet, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Ana deger onerisi ortak bakim, Quick Log, hatirlaticilar, asi/ilac/vet hatirlaticilari ve aile ici gorunurluktur.
+Fluffy Carebook, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Ana deger onerisi ortak bakim, Quick Log, hatirlaticilar, asi/ilac/vet hatirlaticilari ve aile ici gorunurluktur.
 
 ## Faz 1 ana basari kriteri
 
@@ -31,7 +31,7 @@ Dosyalar:
 Test:
 - `npm install`
 - `npx expo start`
-- Ana ekranda YuvioPet gorunmeli
+- Ana ekranda Fluffy Carebook gorunmeli
 - TypeScript hatasi olmamali
 
 Bu sprintte yapilmayacaklar:

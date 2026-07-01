@@ -1,6 +1,6 @@
-# docs/FIRESTORE_MODEL.md - YuvioPet Firestore Veri Modeli
+# docs/FIRESTORE_MODEL.md - Fluffy Carebook Firestore Veri Modeli
 
-YuvioPet, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Veri modeli ortak bakim, Quick Log, reminders ve aile ici gorunurluk etrafinda korunur.
+Fluffy Carebook, aileler ve ortak bakicilar icin evcil hayvan bakim takip uygulamasidir. Veri modeli ortak bakim, Quick Log, reminders ve aile ici gorunurluk etrafinda korunur.
 
 ## Temel ilke
 
