@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluffy Carebook - Smart Pet Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8EA48C;
+            --primary-dark: #6F836E;
+            --bg-color: #FDFBF7;
+            --text-main: #252820;
+            --text-muted: #6F746A;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { padding: 40px 0; display: flex; justify-content: space-between; align-items: center; }
+        .logo-wrap { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 24px; color: var(--primary-dark); }
+        .logo-wrap img { width: 48px; border-radius: 12px; }
+        .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 500; margin-left: 24px; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
+        
+        .hero { display: flex; align-items: center; justify-content: space-between; padding: 80px 0; gap: 60px; }
+        .hero-text { flex: 1; }
+        .hero-title { font-size: 56px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; color: #1a1a1a; letter-spacing: -1px; }
+        .hero-desc { font-size: 20px; color: var(--text-muted); margin-bottom: 40px; }
+        
+        .badges { display: flex; gap: 16px; margin-bottom: 32px; }
+        .store-badge img { height: 56px; transition: transform 0.2s; }
+        .store-badge:hover img { transform: translateY(-3px); }
+        
+        .hero-image { flex: 1; text-align: right; position: relative; }
+        .hero-image img { max-width: 320px; border-radius: 40px; box-shadow: 0 24px 48px rgba(111, 116, 106, 0.2); }
+        
+        .features { padding: 80px 0; background: white; border-radius: 40px; margin-bottom: 80px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding: 40px; }
+        .feature-card { padding: 32px; background: var(--bg-color); border-radius: 24px; text-align: center; transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); }
+        .feature-icon { font-size: 40px; margin-bottom: 16px; }
+        .feature-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+        .feature-desc { color: var(--text-muted); }
+        
+        footer { text-align: center; padding: 40px 0; color: var(--text-muted); border-top: 1px solid #E8E0D3; }
+        footer a { color: var(--primary-dark); text-decoration: none; margin: 0 12px; }
+
+        @media (max-width: 900px) {
+            .hero { flex-direction: column; text-align: center; padding: 40px 0; }
+            .hero-title { font-size: 40px; }
+            .hero-image { text-align: center; margin-top: 40px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .badges { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-wrap">
+                <img src="assets/icon.png" alt="Fluffy Carebook">
+                Fluffy Carebook
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="support.html">Support</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-text">
+                <h1 class="hero-title">Evcil dostunuzun bakımını ailece tek bir yerden takip edin!</h1>
+                <p class="hero-desc">Fluffy Carebook is a smart pet care journal and expense tracker that helps you manage the care of your furry friends together with your family.</p>
+                <div class="badges">
+                    <a href="#" class="store-badge"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="assets/mockup.png" alt="App Screenshot">
+            </div>
+        </section>
+    </div>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Ortak Bakım / Shared Care</h3>
+                    <p class="feature-desc">Eşinizi veya ailenizi davet edin. Evcil hayvanınızın bakım rutinlerini birlikte takip edin.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3 class="feature-title">Hatırlatıcılar / Reminders</h3>
+                    <p class="feature-desc">Aşılar, ilaç saatleri ve veteriner kontrolleri için akıllı bildirimler alın.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 class="feature-title">Masraflar / Expenses</h3>
+                    <p class="feature-desc">Mama ve veteriner masraflarını kategorize edip aylık bütçenizi kontrol edin.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <footer>
+            <p>&copy; 2026 Fluffy Carebook. All rights reserved.</p>
+            <div style="margin-top: 16px;">
+                <a href="support.html">Support / Destek</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
