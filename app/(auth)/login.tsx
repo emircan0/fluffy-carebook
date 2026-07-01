@@ -253,14 +253,14 @@ export default function LoginScreen() {
                     {t('auth.termsPrefix')}
                     <Text 
                       style={styles.linkText} 
-                      onPress={() => Linking.openURL('https://petapp-54886.web.app/terms')}
+                      onPress={() => Linking.openURL('https://emircan0.github.io/fluffy-carebook/terms.html')}
                     >
                       {t('auth.terms')}
                     </Text>
                     {t('auth.and')}
                     <Text 
                       style={styles.linkText} 
-                      onPress={() => Linking.openURL('https://petapp-54886.web.app/privacy')}
+                      onPress={() => Linking.openURL('https://emircan0.github.io/fluffy-carebook/privacy.html')}
                     >
                       {t('auth.privacy')}
                     </Text>

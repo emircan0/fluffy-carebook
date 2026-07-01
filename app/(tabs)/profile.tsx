@@ -367,7 +367,7 @@ export default function ProfileScreen() {
               <View style={styles.webUrlContainer}>
                 <Feather name="globe" size={16} color={colors.textTertiary} />
                 <Text style={styles.webUrlText}>
-                  Web sürümü: https://petapp-54886.web.app/{selectedDoc}
+                  Web sürümü: https://emircan0.github.io/fluffy-carebook/{selectedDoc}.html
                 </Text>
               </View>
             </ScrollView>
