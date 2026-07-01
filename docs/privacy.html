@@ -1,53 +1,94 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluffy Carebook - Gizlilik Politikası ve Kişisel Veriler Metni</title>
+    <title>Fluffy Carebook - Privacy Policy & Terms</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #8EA48C;
+            --primary-dark: #6F836E;
+            --bg-color: #FDFBF7;
+            --text-main: #252820;
+            --text-muted: #6F746A;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.7;
-            color: #1c1e21;
+            color: var(--text-main);
             max-width: 850px;
             margin: 0 auto;
-            padding: 50px 24px;
-            background-color: #f8f9fa;
+            padding: 40px 24px;
+            background-color: var(--bg-color);
         }
+        
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E8E0D3;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+        .logo-wrap img { width: 36px; border-radius: 8px; }
+
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+        }
+        .lang-btn {
+            background: white;
+            border: 1px solid #E8E0D3;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+        .lang-btn.active {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+        
         h1 {
-            color: #000;
-            font-size: 2.4rem;
+            color: #1a1a1a;
+            font-size: 2.2rem;
             font-weight: 800;
             margin-bottom: 8px;
-            text-align: center;
             letter-spacing: -0.5px;
         }
         .subtitle {
-            color: #5f6368;
-            text-align: center;
-            margin-bottom: 50px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
             font-size: 0.95rem;
             font-weight: 500;
         }
         h2 {
-            color: #10B981;
-            font-size: 1.5rem;
-            margin-top: 40px;
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+            margin-top: 35px;
             margin-bottom: 15px;
-            border-bottom: 2px solid #e1e4e8;
+            border-bottom: 2px solid #E8E0D3;
             padding-bottom: 8px;
             font-weight: 700;
         }
-        h3 {
-            color: #202124;
-            font-size: 1.2rem;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
         p, li {
             font-size: 1.05rem;
-            color: #3c4043;
+            color: var(--text-main);
             margin-bottom: 16px;
         }
         ul {
@@ -58,87 +99,172 @@
             margin-bottom: 8px;
         }
         .highlight {
-            background-color: #e8f0fe;
-            padding: 15px 20px;
-            border-left: 4px solid #10B981;
-            border-radius: 4px;
+            background-color: white;
+            padding: 20px;
+            border-left: 4px solid var(--primary-dark);
+            border-radius: 8px;
             margin: 25px 0;
             font-weight: 500;
-            color: #1967d2;
+            box-shadow: 0 4px 12px rgba(111, 116, 106, 0.05);
         }
         .footer {
             margin-top: 60px;
             text-align: center;
             font-size: 0.9rem;
-            color: #80868b;
-            border-top: 1px solid #e1e4e8;
+            color: var(--text-muted);
+            border-top: 1px solid #E8E0D3;
             padding-top: 30px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Gizlilik Politikası ve Kişisel Veriler Metni</h1>
-    <div class="subtitle">Yürürlük Tarihi: 22 Haziran 2026</div>
-
-    <p>Fluffy Carebook ("<strong>Uygulama</strong>" veya "<strong>Biz</strong>"), kullanıcılarının ("<strong>Kullanıcı</strong>" veya "<strong>Siz</strong>") bilgi güvenliğine ve gizliliğine azami düzeyde saygı göstermekte ve kişisel verilerin korunmasını yasal bir zorunluluğun ötesinde temel bir prensip olarak benimsemektedir.</p>
-    
-    <p>İşbu Gizlilik Politikası, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("<strong>KVKK</strong>") ve Avrupa Birliği Genel Veri Koruma Tüzüğü ("<strong>GDPR</strong>") başta olmak üzere ilgili mevzuata uygun olarak, Uygulama aracılığıyla hangi kişisel verilerinizin toplandığı, bunların hangi hukuki amaçlarla işlendiği, kimlere aktarılabileceği ve haklarınız konusunda sizi aydınlatmak amacıyla hazırlanmıştır.</p>
-
-    <div class="highlight">
-        Kayıt esnasında Onay Kutucuğunu işaretleyerek veya Uygulamamızı kullanarak, kişisel verilerinizin bu politikada açıklandığı şekilde işlenmesine, saklanmasına ve aktarılmasına açık rıza göstermiş olursunuz.
+    <div class="header-nav">
+        <a href="index.html" class="logo-wrap">
+            <img src="assets/icon.png" alt="Fluffy Carebook">
+            Fluffy Carebook
+        </a>
+        <div class="lang-switcher">
+            <button onclick="switchLang('tr')" id="btn-tr" class="lang-btn active">Türkçe</button>
+            <button onclick="switchLang('en')" id="btn-en" class="lang-btn">English</button>
+        </div>
     </div>
 
-    <h2>1. Veri Sorumlusu</h2>
-    <p>KVKK ve ilgili düzenlemeler uyarınca, Fluffy Carebook uygulamasını işleten gerçek/tüzel kişi Veri Sorumlusu sıfatını haizdir. İletişim bilgileri politikanın sonunda yer almaktadır.</p>
+    <!-- TURKISH CONTENT -->
+    <div id="content-tr">
+        <h1>Gizlilik Politikası ve Kişisel Veriler Metni</h1>
+        <div class="subtitle">Yürürlük Tarihi: 22 Haziran 2026</div>
 
-    <h2>2. Toplanan Kişisel Veriler</h2>
-    <p>Size daha iyi hizmet sunabilmek ve uygulamanın temel işlevlerini yerine getirebilmek için aşağıdaki veri kategorileri toplanmaktadır:</p>
-    <ul>
-        <li><strong>Kimlik ve İletişim Verileri:</strong> Ad, soyad, e-posta adresi ve şifre (şifrelenmiş olarak). Sosyal giriş (Google, Apple vb.) kullanıldığında, bu platformlardan sağlanan profil bilgileri.</li>
-        <li><strong>Cihaz ve Kullanım Verileri:</strong> IP adresi, cihaz modeli, işletim sistemi versiyonu, Expo Push Token (bildirimler için), uygulamanın kullanım sıklığı ve hata raporları (Crashlytics).</li>
-        <li><strong>Evcil Hayvan Verileri:</strong> Evcil hayvanınızın adı, türü, cinsi, doğum tarihi, cinsiyeti, boy/kilo ölçümleri, aşı takvimi, ilaç isimleri ve yazdığınız özel notlar. <em>(Not: Evcil hayvan verileri yasal olarak "kişisel veri" sayılmasa da, sizin kimliğinizle ilişkilendirilebildiği için aynı hassasiyetle korunur.)</em></li>
-    </ul>
+        <p>Fluffy Carebook ("<strong>Uygulama</strong>" veya "<strong>Biz</strong>"), kullanıcılarının ("<strong>Kullanıcı</strong>" veya "<strong>Siz</strong>") bilgi güvenliğine ve gizliliğine azami düzeyde saygı göstermekte ve kişisel verilerin korunmasını yasal bir zorunluluğun ötesinde temel bir prensip olarak benimsemektedir.</p>
+        
+        <p>İşbu Gizlilik Politikası, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("<strong>KVKK</strong>") ve Avrupa Birliği Genel Veri Koruma Tüzüğü ("<strong>GDPR</strong>") başta olmak üzere ilgili mevzuata uygun olarak, Uygulama aracılığıyla hangi kişisel verilerinizin toplandığı, bunların hangi hukuki amaçlarla işlendiği, kimlere aktarılabileceği ve haklarınız konusunda sizi aydınlatmak amacıyla hazırlanmıştır.</p>
 
-    <h2>3. Kişisel Verilerin İşlenme Amaçları ve Hukuki Sebepleri</h2>
-    <p>Toplanan kişisel verileriniz aşağıdaki amaçlarla ve KVKK Madde 5/2'de belirtilen hukuki sebeplere (Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması, veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi ve meşru menfaat) dayanılarak işlenmektedir:</p>
-    <ul>
-        <li>Kullanıcı kaydının oluşturulması, hesabın yönetilmesi ve yetkisiz girişlerin engellenmesi (Sözleşmenin ifası).</li>
-        <li>Evcil hayvan bakımı için belirlediğiniz rutinlerin (beslenme, ilaç, yürüyüş) takibinin sağlanması ve zamanı geldiğinde Push Bildirim gönderilmesi (Hizmetin sağlanması).</li>
-        <li>Aile üyeleri veya bakıcılarla veri senkronizasyonu yapılabilmesi (Kullanıcının kendi talebi doğrultusunda davet sistemi ile).</li>
-        <li>Olası teknik hataların tespiti, uygulamanın geliştirilmesi ve kullanıcı deneyiminin optimize edilmesi (Meşru menfaat).</li>
-        <li>Yetkili kamu kurum ve kuruluşlarından usulüne uygun hukuki talepler gelmesi halinde yasal yükümlülüklerin yerine getirilmesi.</li>
-    </ul>
+        <div class="highlight">
+            Kayıt esnasında Onay Kutucuğunu işaretleyerek veya Uygulamamızı kullanarak, kişisel verilerinizin bu politikada açıklandığı şekilde işlenmesine, saklanmasına ve aktarılmasına açık rıza göstermiş olursunuz.
+        </div>
 
-    <h2>4. Verilerin Aktarımı ve Yurtdışı Paylaşımı</h2>
-    <p>Fluffy Carebook, kişisel verilerinizi <strong>KESİNLİKLE</strong> reklam verenlere, pazarlama şirketlerine veya veri brokerlarına <strong>SATMAZ VE KİRALAMAZ.</strong></p>
-    <p>Ancak, altyapı hizmeti alabilmek için verileriniz KVKK Madde 9 ve GDPR kurallarına uygun olarak gerekli güvenlik sertifikalarına sahip aşağıdaki global servis sağlayıcılarının güvenli sunucularına aktarılmaktadır (Yurtdışı Aktarımı):</p>
-    <ul>
-        <li><strong>Google Firebase (Firestore & Auth):</strong> Veri tabanı, kullanıcı doğrulama ve bulut depolama altyapısı için.</li>
-        <li><strong>Expo:</strong> Anlık bildirim (Push Notification) servislerinin yönlendirilmesi için.</li>
-    </ul>
+        <h2>1. Veri Sorumlusu</h2>
+        <p>KVKK ve ilgili düzenlemeler uyarınca, Fluffy Carebook uygulamasını işleten gerçek/tüzel kişi Veri Sorumlusu sıfatını haizdir. İletişim bilgileri politikanın sonunda yer almaktadır.</p>
 
-    <h2>5. Veri Güvenliği ve Saklama Süresi</h2>
-    <p>Verileriniz, endüstri standardı şifreleme protokolleri (SSL/TLS) kullanılarak iletilmekte ve güvenli bulut ortamlarında saklanmaktadır. Verileriniz, hesabınız aktif olduğu sürece sistemlerimizde tutulur. Hesabınızı silmeniz durumunda, profil ve evcil hayvan verileriniz, yasal zorunluluklar hariç olmak üzere, sunucularımızdan 30 (otuz) gün içerisinde kalıcı ve geri döndürülemez şekilde silinir.</p>
+        <h2>2. Toplanan Kişisel Veriler</h2>
+        <p>Size daha iyi hizmet sunabilmek ve uygulamanın temel işlevlerini yerine getirebilmek için aşağıdaki veri kategorileri toplanmaktadır:</p>
+        <ul>
+            <li><strong>Kimlik ve İletişim Verileri:</strong> Ad, soyad, e-posta adresi ve şifre (şifrelenmiş olarak). Sosyal giriş (Google, Apple vb.) kullanıldığında, bu platformlardan sağlanan profil bilgileri.</li>
+            <li><strong>Cihaz ve Kullanım Verileri:</strong> IP adresi, cihaz modeli, işletim sistemi versiyonu, Expo Push Token (bildirimler için), uygulamanın kullanım sıklığı ve hata raporları (Crashlytics).</li>
+            <li><strong>Evcil Hayvan Verileri:</strong> Evcil hayvanınızın adı, türü, cinsi, doğum tarihi, cinsiyeti, boy/kilo ölçümleri, aşı takvimi, ilaç isimleri ve yazdığınız özel notlar.</li>
+        </ul>
 
-    <h2>6. İlgili Kişinin (Kullanıcının) Hakları</h2>
-    <p>KVKK'nın 11. maddesi ve GDPR uyarınca aşağıdaki haklara sahipsiniz:</p>
-    <ul>
-        <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
-        <li>İşlenmişse buna ilişkin bilgi talep etme,</li>
-        <li>Verilerin işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
-        <li>Eksik veya yanlış işlenen verilerin düzeltilmesini isteme,</li>
-        <li>KVKK 7. madde çerçevesinde verilerinizin silinmesini veya yok edilmesini talep etme,</li>
-        <li>İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme.</li>
-    </ul>
+        <h2>3. Kişisel Verilerin İşlenme Amaçları ve Hukuki Sebepleri</h2>
+        <p>Toplanan kişisel verileriniz aşağıdaki amaçlarla ve KVKK Madde 5/2'de belirtilen hukuki sebeplere (Sözleşmenin kurulması veya ifası, hukuki yükümlülüklerin yerine getirilmesi ve meşru menfaat) dayanılarak işlenmektedir:</p>
+        <ul>
+            <li>Kullanıcı kaydının oluşturulması, hesabın yönetilmesi ve yetkisiz girişlerin engellenmesi.</li>
+            <li>Evcil hayvan bakımı için belirlediğiniz rutinlerin takibinin sağlanması ve zamanı geldiğinde Push Bildirim gönderilmesi.</li>
+            <li>Aile üyeleri veya bakıcılarla veri senkronizasyonu yapılabilmesi (Kullanıcının kendi daveti doğrultusunda).</li>
+            <li>Olası teknik hataların tespiti, uygulamanın geliştirilmesi ve kullanıcı deneyiminin optimize edilmesi.</li>
+        </ul>
 
-    <h2>7. İletişim ve Talep Yönetimi</h2>
-    <p>Yukarıda belirtilen haklarınızı kullanmak, hesabınızı kalıcı olarak sildirmek veya gizlilik politikamızla ilgili tüm sorularınız için bizimle aşağıdaki e-posta adresi üzerinden iletişime geçebilirsiniz. Talepleriniz en geç 30 (otuz) gün içerisinde ücretsiz olarak sonuçlandırılacaktır.</p>
-    <p><strong>İletişim E-posta:</strong> emircanmertt@gmail.com</p>
+        <h2>4. Verilerin Aktarımı ve Yurtdışı Paylaşımı</h2>
+        <p>Fluffy Carebook, kişisel verilerinizi <strong>KESİNLİKLE SATMAZ VE KİRALAMAZ.</strong></p>
+        <p>Ancak, altyapı hizmeti alabilmek için verileriniz KVKK Madde 9 ve GDPR kurallarına uygun olarak aşağıdaki global servis sağlayıcılarının güvenli sunucularına aktarılmaktadır:</p>
+        <ul>
+            <li><strong>Google Firebase (Firestore & Auth):</strong> Veri tabanı, kullanıcı doğrulama ve bulut depolama altyapısı için.</li>
+            <li><strong>Expo:</strong> Anlık bildirim (Push Notification) servislerinin yönlendirilmesi için.</li>
+        </ul>
+
+        <h2>5. Veri Güvenliği ve Saklama Süresi</h2>
+        <p>Verileriniz, endüstri standardı şifreleme protokolleri (SSL/TLS) kullanılarak iletilmekte ve güvenli bulut ortamlarında saklanmaktadır. Verileriniz, hesabınız aktif olduğu sürece sistemlerimizde tutulur. Hesabınızı silmeniz durumunda, profil ve evcil hayvan verileriniz, yasal zorunluluklar hariç olmak üzere, sunucularımızdan 30 gün içerisinde kalıcı olarak silinir.</p>
+
+        <h2>6. İlgili Kişinin (Kullanıcının) Hakları</h2>
+        <p>KVKK'nın 11. maddesi ve GDPR uyarınca kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, verilerinizin silinmesini isteme ve otomatik sistemlerle yapılan analizlere itiraz etme haklarına sahipsiniz.</p>
+
+        <h2>7. İletişim ve Talep Yönetimi</h2>
+        <p>Tüm sorularınız veya veri silme talepleriniz için bizimle e-posta üzerinden iletişime geçebilirsiniz:</p>
+        <p><strong>E-posta:</strong> emircanmertt@gmail.com</p>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div id="content-en" style="display:none;">
+        <h1>Privacy Policy and Personal Data Text</h1>
+        <div class="subtitle">Effective Date: June 22, 2026</div>
+
+        <p>Fluffy Carebook ("<strong>App</strong>" or "<strong>We</strong>") respects the information security and privacy of its users ("<strong>User</strong>" or "<strong>You</strong>") at the highest level and adopts the protection of personal data as a core principle.</p>
+        
+        <p>This Privacy Policy is prepared in compliance with the Personal Data Protection Law No. 6698 ("<strong>KVKK</strong>") and the General Data Protection Regulation ("<strong>GDPR</strong>") to inform you about which personal data is collected through the App, the legal grounds and purposes of processing, to whom it may be transferred, and your rights.</p>
+
+        <div class="highlight">
+            By checking the consent box during registration or by using our App, you explicitly consent to the processing, storage, and transfer of your personal data as described in this policy.
+        </div>
+
+        <h2>1. Data Controller</h2>
+        <p>Pursuant to KVKK, GDPR, and related regulations, the developer/publisher operating the Fluffy Carebook application acts as the Data Controller. Contact information is located at the end of this policy.</p>
+
+        <h2>2. Collected Personal Data</h2>
+        <p>To provide better service and perform core functions of the application, we collect the following categories of data:</p>
+        <ul>
+            <li><strong>Identity and Contact Data:</strong> Name, surname, email address, and password (encrypted). Profile information provided by social login platforms (Google, Apple, etc.), if used.</li>
+            <li><strong>Device and Usage Data:</strong> IP address, device model, OS version, Expo Push Token (for notifications), app usage frequency, and crash logs (Crashlytics).</li>
+            <li><strong>Pet Data:</strong> Pet name, type, breed, birth date, gender, height/weight measurements, vaccine schedules, medicine names, and custom notes you write.</li>
+        </ul>
+
+        <h2>3. Purposes and Legal Grounds of Processing</h2>
+        <p>Your personal data is processed based on the performance of a contract, compliance with legal obligations, and legitimate interests of the data controller:</p>
+        <ul>
+            <li>Creating user registrations, managing accounts, and preventing unauthorized access.</li>
+            <li>Tracking pet care routines (nutrition, medication) and sending Push Notifications when the time comes.</li>
+            <li>Synchronizing data with family members or caregivers (solely at your own request via invitation).</li>
+            <li>Detecting technical errors, developing the application, and optimizing the user experience.</li>
+        </ul>
+
+        <h2>4. Data Transfer and Sharing</h2>
+        <p>Fluffy Carebook <strong>NEVER SELLS OR RENTS</strong> your personal data to third parties.</p>
+        <p>However, to provide cloud infrastructure and app services, your data is transferred to the secure servers of the following global providers:</p>
+        <ul>
+            <li><strong>Google Firebase (Firestore & Auth):</strong> For database, user authentication, and cloud storage infrastructure.</li>
+            <li><strong>Expo:</strong> For routing push notification services.</li>
+        </ul>
+
+        <h2>5. Data Security and Retention</h2>
+        <p>Your data is transmitted using industry-standard encryption protocols (SSL/TLS) and stored in secure cloud environments. Your data is kept in our systems as long as your account is active. If you delete your account, your profile and pet data will be permanently deleted from our servers within 30 days, except where legal retention is required.</p>
+
+        <h2>6. Rights of the Data Subject</h2>
+        <p>Under GDPR and KVKK, you have the right to learn whether your personal data is being processed, request access to it, demand rectification or erasure, restrict processing, object to profiling, and request data portability.</p>
+
+        <h2>7. Contact and Support</h2>
+        <p>For any questions or data deletion requests, you can contact us via email:</p>
+        <p><strong>Email:</strong> emircanmertt@gmail.com</p>
+    </div>
 
     <div class="footer">
-        &copy; 2026 Fluffy Carebook. Tüm Hakları Saklıdır.
+        &copy; 2026 Fluffy Carebook. All rights reserved.
     </div>
 
+    <script>
+        function switchLang(lang) {
+            const btnTr = document.getElementById('btn-tr');
+            const btnEn = document.getElementById('btn-en');
+            const contentTr = document.getElementById('content-tr');
+            const contentEn = document.getElementById('content-en');
+
+            if (lang === 'tr') {
+                contentTr.style.display = 'block';
+                contentEn.style.display = 'none';
+                btnTr.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                contentTr.style.display = 'none';
+                contentEn.style.display = 'block';
+                btnTr.classList.remove('active');
+                btnEn.classList.add('active');
+            }
+        }
+
+        // Auto-detect browser language
+        const userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('tr')) {
+            switchLang('tr');
+        } else {
+            switchLang('en');
+        }
+    </script>
 </body>
 </html>

@@ -1,53 +1,94 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluffy Carebook - Kullanıcı Sözleşmesi ve Kullanım Koşulları</title>
+    <title>Fluffy Carebook - Terms of Use</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #8EA48C;
+            --primary-dark: #6F836E;
+            --bg-color: #FDFBF7;
+            --text-main: #252820;
+            --text-muted: #6F746A;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.7;
-            color: #1c1e21;
+            color: var(--text-main);
             max-width: 850px;
             margin: 0 auto;
-            padding: 50px 24px;
-            background-color: #f8f9fa;
+            padding: 40px 24px;
+            background-color: var(--bg-color);
         }
+        
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E8E0D3;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+        .logo-wrap img { width: 36px; border-radius: 8px; }
+
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+        }
+        .lang-btn {
+            background: white;
+            border: 1px solid #E8E0D3;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+        .lang-btn.active {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+        
         h1 {
-            color: #000;
-            font-size: 2.4rem;
+            color: #1a1a1a;
+            font-size: 2.2rem;
             font-weight: 800;
             margin-bottom: 8px;
-            text-align: center;
             letter-spacing: -0.5px;
         }
         .subtitle {
-            color: #5f6368;
-            text-align: center;
-            margin-bottom: 50px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
             font-size: 0.95rem;
             font-weight: 500;
         }
         h2 {
-            color: #10B981;
-            font-size: 1.5rem;
-            margin-top: 40px;
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+            margin-top: 35px;
             margin-bottom: 15px;
-            border-bottom: 2px solid #e1e4e8;
+            border-bottom: 2px solid #E8E0D3;
             padding-bottom: 8px;
             font-weight: 700;
         }
-        h3 {
-            color: #202124;
-            font-size: 1.2rem;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
         p, li {
             font-size: 1.05rem;
-            color: #3c4043;
+            color: var(--text-main);
             margin-bottom: 16px;
         }
         ul, ol {
@@ -58,68 +99,132 @@
             margin-bottom: 8px;
         }
         .highlight {
-            background-color: #e8f0fe;
-            padding: 15px 20px;
-            border-left: 4px solid #10B981;
-            border-radius: 4px;
+            background-color: white;
+            padding: 20px;
+            border-left: 4px solid var(--primary-dark);
+            border-radius: 8px;
             margin: 25px 0;
             font-weight: 500;
-            color: #1967d2;
+            box-shadow: 0 4px 12px rgba(111, 116, 106, 0.05);
         }
         .footer {
             margin-top: 60px;
             text-align: center;
             font-size: 0.9rem;
-            color: #80868b;
-            border-top: 1px solid #e1e4e8;
+            color: var(--text-muted);
+            border-top: 1px solid #E8E0D3;
             padding-top: 30px;
         }
     </style>
 </head>
 <body>
 
-    <h1>Kullanıcı Sözleşmesi ve Kullanım Koşulları</h1>
-    <div class="subtitle">Yürürlük Tarihi: 22 Haziran 2026</div>
-
-    <p>Bu Kullanıcı Sözleşmesi ve Kullanım Koşulları ("<strong>Sözleşme</strong>"), Fluffy Carebook mobil uygulamasını ("<strong>Uygulama</strong>" veya "<strong>Platform</strong>") indiren, kullanan veya Uygulama üzerinden hesap oluşturan tüm gerçek ve tüzel kişiler ("<strong>Kullanıcı</strong>") ile Uygulama geliştiricisi ("<strong>Şirket</strong>" veya "<strong>Fluffy Carebook</strong>") arasındaki hukuki ilişkiyi düzenler.</p>
-    
-    <div class="highlight">
-        Lütfen Uygulama'yı kullanmaya başlamadan önce bu Sözleşme'yi dikkatlice okuyunuz. Uygulama'yı indirerek, kurarak veya kullanarak bu Sözleşme'deki tüm şartları kabul etmiş, onaylamış ve yasal olarak bağlanmış olursunuz. Şartların herhangi bir bölümünü kabul etmiyorsanız, Uygulama'yı cihazınızdan derhal kaldırmalı ve kullanmamalısınız.
+    <div class="header-nav">
+        <a href="index.html" class="logo-wrap">
+            <img src="assets/icon.png" alt="Fluffy Carebook">
+            Fluffy Carebook
+        </a>
+        <div class="lang-switcher">
+            <button onclick="switchLang('tr')" id="btn-tr" class="lang-btn active">Türkçe</button>
+            <button onclick="switchLang('en')" id="btn-en" class="lang-btn">English</button>
+        </div>
     </div>
 
-    <h2>1. Sözleşmenin Konusu ve Hizmet Kapsamı</h2>
-    <p><strong>1.1.</strong> İşbu Sözleşme'nin konusu; Kullanıcı'nın, Uygulama üzerinden sunulan evcil hayvan bakım takibi, beslenme, aşı, ilaç ve günlük rutin yönetimi gibi kişisel veri takibi hizmetlerinden ("<strong>Hizmetler</strong>") yararlanmasına ilişkin usul ve esasların ile tarafların karşılıklı hak ve yükümlülüklerinin belirlenmesidir.</p>
-    <p><strong>1.2.</strong> Fluffy Carebook, evcil hayvan sahiplerinin ve bakıcılarının organizasyon ve takip süreçlerini kolaylaştırmayı amaçlayan bir dijital asistan uygulamasıdır. Sunulan Hizmetler hiçbir şekilde ticari, teşhis edici veya tıbbi bir nitelik taşımaz.</p>
+    <!-- TURKISH CONTENT -->
+    <div id="content-tr">
+        <h1>Kullanıcı Sözleşmesi ve Kullanım Koşulları</h1>
+        <div class="subtitle">Yürürlük Tarihi: 22 Haziran 2026</div>
 
-    <h2>2. Tıbbi Tavsiye Olmama ve Sorumluluk Reddi (ÖNEMLİ)</h2>
-    <p><strong>2.1.</strong> Fluffy Carebook, bir veteriner hekimlik, tıbbi teşhis, tedavi veya sağlık hizmeti sunucusu DEĞİLDİR. Uygulama içerisinde yer alan hiçbir bilgi, hesaplama, grafik veya bildirim, profesyonel bir veteriner hekim tavsiyesi yerine geçemez.</p>
-    <p><strong>2.2.</strong> Kullanıcı, evcil hayvanının sağlığı, diyeti, ilaç kullanımı ve genel bakımı ile ilgili konularda HER ZAMAN nitelikli ve lisanslı bir veteriner hekime danışmakla yükümlüdür.</p>
-    <p><strong>2.3.</strong> Uygulama tarafından oluşturulan takvimlerin, hatırlatıcıların veya ölçüm analizlerinin gecikmesi, hatalı girilmesi veya yanlış yorumlanmasından kaynaklanabilecek evcil hayvanın sağlık sorunları, yaralanmaları veya kaybı dahil hiçbir maddi veya manevi zarardan Fluffy Carebook hukuki ve cezai olarak sorumlu tutulamaz.</p>
+        <p>Bu Kullanıcı Sözleşmesi ve Kullanım Koşulları ("<strong>Sözleşme</strong>"), Fluffy Carebook mobil uygulamasını ("<strong>Uygulama</strong>") indiren, kullanan veya hesap oluşturan tüm kişiler ("<strong>Kullanıcı</strong>") ile Uygulama geliştiricisi arasındaki hukuki ilişkiyi düzenler.</p>
+        
+        <div class="highlight">
+            Lütfen Uygulama'yı kullanmaya başlamadan önce bu Sözleşme'yi dikkatlice okuyunuz. Uygulama'yı kullanarak bu Sözleşme'deki tüm şartları kabul etmiş ve yasal olarak bağlanmış olursunuz.
+        </div>
 
-    <h2>3. Kullanıcı Hak ve Yükümlülükleri</h2>
-    <p><strong>3.1. Kayıt ve Güvenlik:</strong> Uygulama'nın tam kapasiteyle kullanılabilmesi için Kullanıcı'nın doğru, eksiksiz ve güncel bilgilerle kayıt olması gereklidir. Hesabın ve şifrenin güvenliğinden tamamen Kullanıcı sorumludur. Hesabın yetkisiz kişilerce kullanıldığının tespiti halinde durum derhal Fluffy Carebook'e bildirilmelidir.</p>
-    <p><strong>3.2. Hukuka Uygun Kullanım:</strong> Kullanıcı, Uygulama'yı yürürlükteki tüm ulusal ve uluslararası mevzuata uygun şekilde kullanmayı kabul eder. Uygulama üzerinden yasadışı, telif haklarını ihlal eden, tehditkar, hakaret içeren veya üçüncü kişilerin haklarına tecavüz eden hiçbir içerik, not veya medya paylaşılamaz.</p>
-    <p><strong>3.3. Doğru Bilgi Girişi:</strong> Sisteme girilen aşı tarihleri, ilaç dozları ve randevu saatleri Kullanıcı'nın kendi beyanına dayanır. Hatalı veri girişinden doğacak sonuçların tüm sorumluluğu Kullanıcı'ya aittir.</p>
-    <p><strong>3.4. Paylaşım ve Davetler:</strong> Kullanıcı, kendi evcil hayvanının profiline diğer Kullanıcıları (aile üyeleri, bakıcılar vb.) davet edebilir. Bu davet sonucunda verilerin üçüncü kişilerle paylaşılmasından doğacak gizlilik ihlallerinde Şirket'in hiçbir sorumluluğu bulunmamaktadır.</p>
+        <h2>1. Sözleşmenin Konusu ve Hizmet Kapsamı</h2>
+        <p><strong>1.1.</strong> İşbu Sözleşme; Kullanıcı'nın, Uygulama üzerinden sunulan evcil hayvan bakım takibi, beslenme, aşı, ilaç ve günlük rutin yönetimi gibi kişisel veri takibi hizmetlerinden yararlanmasına ilişkin esasları belirler.</p>
+        <p><strong>1.2.</strong> Fluffy Carebook, evcil hayvan sahiplerinin ve bakıcılarının takip süreçlerini kolaylaştırmayı amaçlayan dijital bir asistandır. Sunulan hizmetler tıbbi veya teşhis edici nitelik taşımaz.</p>
 
-    <h2>4. Şirket'in Hak ve Yükümlülükleri</h2>
-    <p><strong>4.1. Kesintisiz Hizmet Garantisi Olmaması:</strong> Şirket, Uygulama'nın kesintisiz, hatasız veya siber saldırılara karşı tamamen korumalı olduğunu garanti etmez. Bakım çalışmaları, güncellemeler veya mücbir sebeplerden dolayı hizmette kesintiler yaşanabilir.</p>
-    <p><strong>4.2. Değişiklik Hakkı:</strong> Şirket, Uygulama'nın özelliklerini, tasarımını veya hizmet kapsamını dilediği zaman önceden haber vermeksizin değiştirme, kısıtlama veya tamamen durdurma hakkını saklı tutar.</p>
-    <p><strong>4.3. İçerik ve Hesap Silme:</strong> Fluffy Carebook, bu Sözleşme'ye aykırı hareket ettiğini tespit ettiği Kullanıcı hesaplarını, önceden bildirimde bulunmaksızın askıya alma veya kalıcı olarak silme hakkına sahiptir.</p>
+        <h2>2. Tıbbi Tavsiye Olmama ve Sorumluluk Reddi (ÖNEMLİ)</h2>
+        <p><strong>2.1.</strong> Fluffy Carebook, bir veteriner hekimlik veya sağlık hizmeti sunucusu DEĞİLDİR. Uygulama içerisindeki hiçbir bilgi veya analiz, profesyonel bir veteriner hekim tavsiyesi yerine geçemez.</p>
+        <p><strong>2.2.</strong> Kullanıcı, evcil dostunun sağlığı ve tedavisi ile ilgili konularda HER ZAMAN yetkili bir veteriner hekime danışmakla yükümlüdür.</p>
+        <p><strong>2.3.</strong> Uygulama üzerindeki hatırlatıcıların aksaması veya yanlış veri girişinden kaynaklanabilecek sağlık sorunları dahil hiçbir zarardan Fluffy Carebook sorumlu tutulamaz.</p>
 
-    <h2>5. Fikri Mülkiyet Hakları</h2>
-    <p>Uygulama'nın tasarımı, yazılımı, algoritması, arayüzü, alan adı, markası ve logosu dahil her türlü fikri ve sınai mülkiyet hakkı münhasıran Fluffy Carebook'e aittir. Kullanıcı'ya sadece kişisel, ticari olmayan ve devredilemez bir kullanım lisansı verilmiştir. Kodların kopyalanması, tersine mühendislik yapılması veya Uygulama'nın Şirket'in izni olmaksızın ticari amaçlarla kullanılması kesinlikle yasaktır ve hukuki yaptırıma tabidir.</p>
+        <h2>3. Kullanıcı Hak ve Yükümlülükleri</h2>
+        <p><strong>3.1. Kayıt ve Güvenlik:</strong> Hesap bilgilerinizin ve şifrenizin güvenliğinden tamamen siz sorumlusunuz.</p>
+        <p><strong>3.2. Hukuka Uygun Kullanım:</strong> Uygulamada yasadışı, hakaret içerikli veya telif hakkı ihlali barındıran hiçbir içerik veya not paylaşılamaz.</p>
+        <p><strong>3.3. Doğru Bilgi Girişi:</strong> Sisteme girilen aşı tarihleri, ilaç dozları ve randevu saatleri Kullanıcı'nın kendi sorumluluğundadır.</p>
 
-    <h2>6. Uyuşmazlıkların Çözümü</h2>
-    <p>İşbu Sözleşme'nin uygulanmasından veya yorumlanmasından doğacak her türlü hukuki uyuşmazlığın çözümünde Türk Hukuku uygulanacak olup, İstanbul Merkez (Çağlayan) Mahkemeleri ve İcra Daireleri münhasıran yetkilidir.</p>
+        <h2>4. Fikri Mülkiyet Hakları</h2>
+        <p>Uygulama'nın yazılımı, tasarımı, logosu ve markası dahil tüm fikri ve sınai mülkiyet hakları Fluffy Carebook'e aittir. Kodların kopyalanması veya tersine mühendislik yapılması kesinlikle yasaktır.</p>
 
-    <h2>7. Sözleşmenin Yürürlüğü</h2>
-    <p>İşbu Sözleşme, Kullanıcı'nın Uygulama'ya kayıt olduğu veya Uygulama'yı kullanmaya başladığı an elektronik ortamda onaylanmış sayılarak yürürlüğe girer. Fluffy Carebook, Sözleşme koşullarını dilediği zaman tek taraflı olarak güncelleyebilir; güncel şartlar Uygulama içinde veya bu web sayfasında yayınlandığı andan itibaren geçerli olur.</p>
+        <h2>5. Uyuşmazlıklar ve Yürürlük</h2>
+        <p>Uyuşmazlıkların çözümünde Türk Hukuku uygulanacak olup İstanbul Mahkemeleri yetkilidir. Bu sözleşme, Uygulama'yı kullanmaya başladığınız an yürürlüğe girer.</p>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div id="content-en" style="display:none;">
+        <h1>Terms of Use and User Agreement</h1>
+        <div class="subtitle">Effective Date: June 22, 2026</div>
+
+        <p>This User Agreement and Terms of Use ("<strong>Agreement</strong>") governs the legal relationship between anyone who downloads, uses, or registers an account in the Fluffy Carebook mobile application ("<strong>App</strong>") and the developer.</p>
+        
+        <div class="highlight">
+            Please read this Agreement carefully before using the App. By using the App, you agree to all the terms and conditions in this Agreement and are legally bound by them.
+        </div>
+
+        <h2>1. Subject and Scope</h2>
+        <p><strong>1.1.</strong> This Agreement defines the terms under which the User may utilize pet care tracking, nutrition, vaccine schedules, medication, and daily routine management features ("<strong>Services</strong>") provided by the App.</p>
+        <p><strong>1.2.</strong> Fluffy Carebook is a digital assistant aiming to simplify organization for pet owners and caregivers. The Services do not hold commercial, diagnostic, or medical purposes.</p>
+
+        <h2>2. No Medical Advice and Disclaimer (IMPORTANT)</h2>
+        <p><strong>2.1.</strong> Fluffy Carebook is NOT a veterinary or medical health provider. None of the information, calculations, or analyses in the App replace professional veterinary advice.</p>
+        <p><strong>2.2.</strong> The User is ALWAYS responsible for consulting a licensed veterinarian regarding the health, diet, medications, and general care of their pets.</p>
+        <p><strong>2.3.</strong> Fluffy Carebook cannot be held legally liable for any direct or indirect damage, health issues, injury, or loss of pets resulting from missed reminders, wrong data entry, or misinterpretation of statistics.</p>
+
+        <h2>3. User Rights and Obligations</h2>
+        <p><strong>3.1. Registration and Security:</strong> You are fully responsible for the security of your account and password.</p>
+        <p><strong>3.2. Lawful Use:</strong> You agree not to post any illegal, threatening, defamatory, or copyrighted content in the App notes and media.</p>
+        <p><strong>3.3. Data Accuracy:</strong> The accuracy of vaccine dates, medication doses, and appointments lies solely with the User.</p>
+
+        <h2>4. Intellectual Property</h2>
+        <p>All intellectual property rights, including software, design, logos, and branding of the App, belong exclusively to Fluffy Carebook. Copying, decompiling, or reverse engineering is strictly prohibited.</p>
+
+        <h2>5. Disputes and Validity</h2>
+        <p>Any disputes arising from this Agreement will be governed by Turkish Law, and Istanbul Courts will have exclusive jurisdiction. This Agreement comes into effect electronically as soon as you start using the App.</p>
+    </div>
 
     <div class="footer">
-        &copy; 2026 Fluffy Carebook. Tüm Hakları Saklıdır.<br>
-        İletişim: emircanmertt@gmail.com
+        &copy; 2026 Fluffy Carebook. All rights reserved.
     </div>
 
+    <script>
+        function switchLang(lang) {
+            const btnTr = document.getElementById('btn-tr');
+            const btnEn = document.getElementById('btn-en');
+            const contentTr = document.getElementById('content-tr');
+            const contentEn = document.getElementById('content-en');
+
+            if (lang === 'tr') {
+                contentTr.style.display = 'block';
+                contentEn.style.display = 'none';
+                btnTr.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                contentTr.style.display = 'none';
+                contentEn.style.display = 'block';
+                btnTr.classList.remove('active');
+                btnEn.classList.add('active');
+            }
+        }
+
+        // Auto-detect browser language
+        const userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('tr')) {
+            switchLang('tr');
+        } else {
+            switchLang('en');
+        }
+    </script>
 </body>
 </html>
